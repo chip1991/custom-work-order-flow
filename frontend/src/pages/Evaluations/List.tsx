@@ -87,9 +87,49 @@ export default function EvaluationsList() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="flex-1 overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+        {/* Table / Mobile Cards */}
+        <div className="flex-1 overflow-x-auto bg-gray-50/30">
+          {/* Mobile Cards */}
+          <div className="md:hidden divide-y divide-gray-200">
+            {loading && tasks.length === 0 ? (
+              <div className="p-8 text-center text-gray-500 flex flex-col items-center">
+                <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+                <p>加载中...</p>
+              </div>
+            ) : filteredTasks.length === 0 ? (
+              <div className="p-8 text-center text-gray-500 flex flex-col items-center">
+                <ListIcon className="w-12 h-12 text-gray-300 mb-4" />
+                <p className="text-lg font-medium text-gray-900">暂无测评任务</p>
+                <p className="text-sm mt-1">点击右上角"创建测评"开始</p>
+              </div>
+            ) : (
+              filteredTasks.map((task) => (
+                <div key={task.id} className="p-4 bg-white hover:bg-gray-50 transition-colors">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-sm font-medium text-gray-900 truncate pr-4">{task.name}</div>
+                    <div className="flex-shrink-0">{getStatusBadge(task.status)}</div>
+                  </div>
+                  <div className="flex items-center text-xs text-gray-500 mb-3 space-x-4">
+                    <span>模型数: {task.models?.length || 0}</span>
+                    <span>题目数: {task.questions?.length || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+                    <span>{new Date(task.createdAt).toLocaleString()}</span>
+                    <button
+                      onClick={() => navigate(`/evaluations/${task.id}`)}
+                      className="text-indigo-600 hover:text-indigo-900 transition-colors inline-flex items-center font-medium"
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
+                      详情
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Table */}
+          <table className="min-w-full divide-y divide-gray-200 hidden md:table">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

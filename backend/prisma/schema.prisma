@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Model {
+  id        String   @id @default(uuid())
+  name      String
+  provider  String
+  baseUrl   String?
+  apiKey    String?
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks       Task[]       @relation("TaskModels")
+  taskResults TaskResult[]
+}
+
+model Question {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages    Message[]
+  tasks       Task[]       @relation("TaskQuestions")
+  taskResults TaskResult[]
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  role       String   // 'system', 'user', 'assistant'
+  content    String
+  questionId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model Task {
+  id        String   @id @default(uuid())
+  name      String
+  status    String   @default("pending") // 'pending', 'running', 'completed', 'failed'
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  models    Model[]      @relation("TaskModels")
+  questions Question[]   @relation("TaskQuestions")
+  results   TaskResult[]
+}
+
+model TaskResult {
+  id             String   @id @default(uuid())
+  taskId         String
+  modelId        String
+  questionId     String
+  response       String?
+  timeTaken      Int?     // in ms
+  firstTokenTime Int?     // in ms
+  tokensUsed     Int?
+  status         String   @default("success") // 'success', 'error'
+  error          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  task     Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  model    Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}

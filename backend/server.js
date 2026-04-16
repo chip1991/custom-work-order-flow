@@ -1,12 +1,25 @@
-const http = require('http');
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { PrismaClient } = require('@prisma/client');
 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Backend is running\n');
+const prisma = new PrismaClient({});
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+
+// Basic health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Backend is running' });
 });
 
-const port = 3000;
-server.listen(port, () => {
-  console.log(`Backend server running at http://localhost:${port}/`);
+// Routes
+app.use('/api/models', require('./routes/models'));
+app.use('/api/questions', require('./routes/questions'));
+app.use('/api/tasks', require('./routes/tasks'));
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });

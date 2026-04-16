@@ -36,8 +36,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white font-sans text-[#1a1a1a]">
-      <div className="w-full max-w-[360px] px-6 pb-20">
-        <h1 className="text-[26px] font-medium text-center mb-10">
+      <div className="w-full px-4 md:max-w-[360px] md:px-6 pb-20">
+        <h1 className="text-2xl md:text-[26px] font-medium text-center mb-10">
           {loginMethod === "phone" ? "手机号登录" : "账号/邮箱登录"}
         </h1>
 

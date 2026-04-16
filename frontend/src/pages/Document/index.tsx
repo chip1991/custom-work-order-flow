@@ -19,14 +19,14 @@ export default function DocumentPage() {
 
       if (line.startsWith("# ")) {
         return (
-          <h1 key={index} className="text-3xl font-bold text-gray-900 mt-10 mb-6">
+          <h1 key={index} className="text-2xl md:text-3xl font-bold text-gray-900 mt-8 md:mt-10 mb-4 md:mb-6">
             {line.replace("# ", "")}
           </h1>
         );
       }
       if (line.startsWith("## ")) {
         return (
-          <h2 key={index} className="text-2xl font-semibold text-gray-800 mt-8 mb-4">
+          <h2 key={index} className="text-xl md:text-2xl font-semibold text-gray-800 mt-6 md:mt-8 mb-3 md:mb-4">
             {line.replace("## ", "")}
           </h2>
         );
@@ -52,21 +52,21 @@ export default function DocumentPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center">
-      <div className="flex w-full max-w-6xl my-10 bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
+      <div className="flex flex-col md:flex-row w-full max-w-6xl md:my-10 bg-white shadow-sm md:rounded-lg overflow-hidden border-0 md:border border-gray-100">
         
         {/* Sidebar Navigation */}
-        <aside className="w-64 bg-gray-50/50 border-r border-gray-100 flex-shrink-0">
-          <div className="p-6 pb-2">
-            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+        <aside className="w-full md:w-64 bg-gray-50/50 border-b md:border-b-0 md:border-r border-gray-100 flex-shrink-0">
+          <div className="p-4 md:p-6 pb-2">
+            <h3 className="text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2 md:mb-4">
               法律与协议
             </h3>
           </div>
-          <nav className="px-4 space-y-1 pb-6">
+          <nav className="flex flex-row md:flex-col px-4 space-x-2 md:space-x-0 md:space-y-1 pb-4 md:pb-6 overflow-x-auto whitespace-nowrap">
             {documents.map((doc) => (
               <Link
                 key={doc.id}
                 to={`/docs/${doc.id}`}
-                className={`block px-4 py-3 rounded-md text-sm transition-colors ${
+                className={`block px-4 py-2.5 md:py-3 rounded-md text-sm transition-colors ${
                   currentDoc.id === doc.id
                     ? "bg-blue-50 text-blue-600 font-medium"
                     : "text-gray-600 hover:bg-gray-100"
@@ -79,8 +79,8 @@ export default function DocumentPage() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 px-12 py-10 overflow-y-auto">
-          <article className="max-w-3xl">
+        <main className="flex-1 px-6 md:px-12 py-8 md:py-10 overflow-y-auto">
+          <article className="max-w-3xl mx-auto md:mx-0">
             {renderMarkdown(currentDoc.content)}
           </article>
         </main>

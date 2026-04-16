@@ -129,9 +129,73 @@ export default function Models() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="flex-1 overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+        {/* Table / Mobile Cards */}
+        <div className="flex-1 overflow-x-auto bg-gray-50/30">
+          <div className="md:hidden divide-y divide-gray-200">
+            {loading ? (
+              <div className="p-8 text-center text-gray-500 flex flex-col items-center">
+                <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                <p>加载中...</p>
+              </div>
+            ) : currentModels.length === 0 ? (
+              <div className="p-8 text-center text-gray-500 flex flex-col items-center">
+                <Cpu className="w-12 h-12 text-gray-300 mb-4" />
+                <p className="text-lg font-medium text-gray-900">未找到模型</p>
+              </div>
+            ) : (
+              currentModels.map((model) => (
+                <div key={model.id} className="p-4 bg-white">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <div className="h-8 w-8 rounded bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm mr-3">
+                        {model.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{model.name}</div>
+                        <div className="text-xs text-gray-500 mt-0.5">{model.provider}</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleToggleStatus(model)}
+                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                        model.enabled 
+                          ? "bg-green-100 text-green-800 hover:bg-green-200" 
+                          : "bg-red-100 text-red-800 hover:bg-red-200"
+                      }`}
+                    >
+                      {model.enabled ? (
+                        <><CheckCircle2 className="w-3.5 h-3.5 mr-1" /> 已启用</>
+                      ) : (
+                        <><XCircle className="w-3.5 h-3.5 mr-1" /> 已停用</>
+                      )}
+                    </button>
+                  </div>
+                  <div className="text-xs text-gray-500 mb-3 truncate">
+                    URL: {model.baseUrl || "默认接口"}
+                  </div>
+                  <div className="flex items-center justify-end space-x-4 border-t border-gray-100 pt-3 mt-3">
+                    <button
+                      onClick={() => {
+                        setEditingModel(model);
+                        setIsModalOpen(true);
+                      }}
+                      className="text-blue-600 hover:text-blue-900 text-sm font-medium flex items-center"
+                    >
+                      <Edit2 className="w-4 h-4 mr-1" /> 编辑
+                    </button>
+                    <button
+                      onClick={() => handleDelete(model.id)}
+                      className="text-red-600 hover:text-red-900 text-sm font-medium flex items-center"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" /> 删除
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          
+          <table className="min-w-full divide-y divide-gray-200 hidden md:table">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -237,14 +301,14 @@ export default function Models() {
         {/* Pagination */}
         {filteredModels.length > 0 && (
           <div className="bg-white px-4 py-3 border-t border-gray-200 flex items-center justify-between sm:px-6">
-            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-              <div>
+            <div className="flex-1 flex items-center justify-between">
+              <div className="hidden sm:block">
                 <p className="text-sm text-gray-700">
                   显示 <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> 到 <span className="font-medium">{Math.min(currentPage * itemsPerPage, filteredModels.length)}</span> 条，
                   共 <span className="font-medium">{filteredModels.length}</span> 条
                 </p>
               </div>
-              <div>
+              <div className="flex-1 sm:flex-none flex justify-center sm:justify-end">
                 <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                   <button
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}

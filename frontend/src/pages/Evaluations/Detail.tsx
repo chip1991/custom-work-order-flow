@@ -211,23 +211,23 @@ export default function EvaluationsDetail() {
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
-        {/* Questions Sidebar */}
+        {/* Questions Sidebar / Mobile Top Tabs */}
         <div className="w-full lg:w-64 flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden shrink-0">
-          <div className="p-4 border-b border-gray-200 bg-gray-50/50">
+          <div className="p-4 border-b border-gray-200 bg-gray-50/50 hidden lg:block">
             <h2 className="font-semibold text-gray-900">测评题目</h2>
           </div>
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+          <div className="flex lg:flex-col overflow-x-auto lg:overflow-y-auto p-2 space-x-2 lg:space-x-0 lg:space-y-1">
             {task.questions?.map(q => (
               <button
                 key={q.id}
                 onClick={() => setActiveQuestionId(q.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                className={`flex-none lg:w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap lg:whitespace-normal ${
                   activeQuestionId === q.id
                     ? "bg-indigo-50 text-indigo-700 font-medium"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
               >
-                <div className="truncate">{q.name}</div>
+                <div className="truncate max-w-[200px] lg:max-w-none">{q.name}</div>
               </button>
             ))}
           </div>
@@ -241,15 +241,15 @@ export default function EvaluationsDetail() {
             </h2>
           </div>
           
-          <div className="flex-1 overflow-x-auto">
-            <div className="flex h-full min-w-max p-4 gap-4">
+          <div className="flex-1 overflow-x-hidden overflow-y-auto lg:overflow-x-auto lg:overflow-y-hidden bg-gray-50">
+            <div className="flex flex-col lg:flex-row lg:h-full lg:min-w-max p-4 gap-4">
               {task.models?.map(model => {
                 const result = activeQuestionResults.find(r => r.modelId === model.id);
                 
                 return (
-                  <div key={model.id} className="w-80 sm:w-96 flex flex-col bg-gray-50 rounded-xl border border-gray-200 overflow-hidden shrink-0">
+                  <div key={model.id} className="w-full lg:w-80 xl:w-96 flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden shrink-0 min-h-[300px] lg:min-h-0 shadow-sm">
                     {/* Model Header */}
-                    <div className="p-3 border-b border-gray-200 bg-white flex justify-between items-center">
+                    <div className="p-3 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
                       <div className="flex items-center gap-2 truncate">
                         <div className="h-6 w-6 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs">
                           {model.name.charAt(0).toUpperCase()}

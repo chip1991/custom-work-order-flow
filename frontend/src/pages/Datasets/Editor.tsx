@@ -186,43 +186,56 @@ export default function DatasetEditor() {
                   : 'border-green-200'
               } p-4`}
             >
-              <div className="flex items-start space-x-4">
-                <div className="flex flex-col items-center justify-center space-y-1 text-gray-400 mt-2">
+              <div className="flex flex-col sm:flex-row items-start sm:space-x-4 space-y-4 sm:space-y-0">
+                <div className="flex flex-row sm:flex-col items-center justify-between sm:justify-center w-full sm:w-auto space-x-2 sm:space-x-0 sm:space-y-1 text-gray-400 mt-0 sm:mt-2">
+                  <div className="flex sm:flex-col items-center space-x-2 sm:space-x-0 sm:space-y-1">
+                    <button
+                      onClick={() => moveMessage(index, 'up')}
+                      disabled={index === 0}
+                      className="hover:text-gray-700 disabled:opacity-30 disabled:hover:text-gray-400 p-1 sm:p-0"
+                      title="上移"
+                    >
+                      <GripVertical className="w-5 h-5 sm:w-4 sm:h-4 transform sm:rotate-0 rotate-90" />
+                    </button>
+                    <span className="text-xs font-medium text-gray-500 bg-gray-100 sm:bg-transparent px-2 py-0.5 rounded-full sm:px-0 sm:py-0">
+                      {index + 1}
+                    </span>
+                    <button
+                      onClick={() => moveMessage(index, 'down')}
+                      disabled={index === messages.length - 1}
+                      className="hover:text-gray-700 disabled:opacity-30 disabled:hover:text-gray-400 p-1 sm:p-0"
+                      title="下移"
+                    >
+                      <GripVertical className="w-5 h-5 sm:w-4 sm:h-4 transform sm:rotate-0 rotate-90" />
+                    </button>
+                  </div>
+                  
+                  {/* Mobile delete button (shows only on small screens) */}
                   <button
-                    onClick={() => moveMessage(index, 'up')}
-                    disabled={index === 0}
-                    className="hover:text-gray-700 disabled:opacity-30 disabled:hover:text-gray-400"
-                    title="上移"
+                    onClick={() => handleRemoveMessage(index)}
+                    className="sm:hidden text-red-400 hover:text-red-600 transition-colors p-1"
+                    title="删除该条对话"
                   >
-                    <GripVertical className="w-4 h-4" />
-                  </button>
-                  <span className="text-xs font-medium text-gray-500">
-                    {index + 1}
-                  </span>
-                  <button
-                    onClick={() => moveMessage(index, 'down')}
-                    disabled={index === messages.length - 1}
-                    className="hover:text-gray-700 disabled:opacity-30 disabled:hover:text-gray-400"
-                    title="下移"
-                  >
-                    <GripVertical className="w-4 h-4" />
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="flex-1 space-y-3">
+                <div className="flex-1 space-y-3 w-full">
                   <div className="flex items-center justify-between">
                     <select
                       value={msg.role}
                       onChange={(e) => handleMessageChange(index, 'role', e.target.value)}
-                      className="block w-32 px-3 py-1.5 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50"
+                      className="block w-full sm:w-32 px-3 py-2 sm:py-1.5 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50"
                     >
                       <option value="system">System</option>
                       <option value="user">User</option>
                       <option value="assistant">Assistant</option>
                     </select>
+                    
+                    {/* Desktop delete button (shows only on larger screens) */}
                     <button
                       onClick={() => handleRemoveMessage(index)}
-                      className="text-red-400 hover:text-red-600 transition-colors"
+                      className="hidden sm:block text-red-400 hover:text-red-600 transition-colors"
                       title="删除该条对话"
                     >
                       <Trash2 className="w-4 h-4" />

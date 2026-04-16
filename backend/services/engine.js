@@ -62,10 +62,19 @@ class EvaluationEngine {
 
       this.broadcast(taskId, { type: 'task_started', taskId });
 
-      // 2. Prepare task results records
-      const combinations = [];
+      // 2. Initialize memory for each model to maintain multi-turn dialogue context
+      const modelHistories = new Map();
       for (const model of task.models) {
-        for (const question of task.questions) {
+        modelHistories.set(model.id, []);
+      }
+
+      // 3. Serially iterate through each question
+      for (let i = 0; i < task.questions.length; i++) {
+        const question = task.questions[i];
+        
+        // Prepare promises for all models for the current question
+        const promises = task.models.map(async (model) => {
+          // Create task result record
           const result = await prisma.taskResult.create({
             data: {
               taskId,
@@ -74,13 +83,39 @@ class EvaluationEngine {
               status: 'running'
             }
           });
-          combinations.push({ model, question, resultId: result.id });
+          
+          const combo = { model, question, resultId: result.id };
+          
+          // Get previous history for this model
+          const history = modelHistories.get(model.id);
+          
+          // Get current question messages
+          const currentMessages = question.messages.map(m => ({
+            role: m.role,
+            content: m.content
+          }));
+          
+          // Combine history and current messages
+          const customMessages = [...history, ...currentMessages];
+          
+          // Run evaluation
+          const responseText = await this.runEvaluation(taskId, combo, customMessages);
+          
+          // If successful, append the current messages and the model's response to the history
+          if (responseText) {
+            history.push(...currentMessages);
+            history.push({ role: 'assistant', content: responseText });
+          }
+        });
+        
+        // Concurrently run evaluations for all models on this single question
+        await Promise.allSettled(promises);
+        
+        // Wait 10 seconds before proceeding to the next question, unless it's the last question
+        if (i < task.questions.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 10000));
         }
       }
-
-      // 3. Concurrently run evaluations
-      const promises = combinations.map(combo => this.runEvaluation(taskId, combo));
-      await Promise.allSettled(promises);
 
       // 4. Update task to completed
       await prisma.task.update({
@@ -99,7 +134,7 @@ class EvaluationEngine {
     }
   }
 
-  async runEvaluation(taskId, { model, question, resultId }) {
+  async runEvaluation(taskId, { model, question, resultId }, customMessages = null) {
     const startTime = Date.now();
     let firstTokenTime = null;
     let fullResponse = '';
@@ -115,7 +150,7 @@ class EvaluationEngine {
 
       const openai = new OpenAI(config);
       
-      const messages = question.messages.map(m => ({
+      const messages = customMessages || question.messages.map(m => ({
         role: m.role,
         content: m.content
       }));
@@ -169,6 +204,8 @@ class EvaluationEngine {
         firstTokenTime
       });
 
+      return fullResponse;
+
     } catch (error) {
       console.error(`Evaluation failed for model ${model.name}, question ${question.name}:`, error);
       const timeTaken = Date.now() - startTime;
@@ -191,6 +228,8 @@ class EvaluationEngine {
         questionId: question.id,
         error: error.message || 'Unknown error'
       });
+
+      return null;
     }
   }
 }

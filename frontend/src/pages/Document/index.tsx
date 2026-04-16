@@ -14,7 +14,9 @@ export default function DocumentPage() {
 
   // A very basic markdown-to-html renderer for headers and paragraphs
   const renderMarkdown = (text: string) => {
-    return text.split("\\n").map((line, index) => {
+    return text.split("\n").map((line, index) => {
+      if (!line.trim()) return null;
+
       if (line.startsWith("# ")) {
         return (
           <h1 key={index} className="text-3xl font-bold text-gray-900 mt-10 mb-6">

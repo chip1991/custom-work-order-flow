@@ -150,7 +150,7 @@ export default function EvaluationsDetail() {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="flex flex-col items-center justify-center text-gray-500">
-          <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
           <p>加载测评详情...</p>
         </div>
       </div>
@@ -223,7 +223,7 @@ export default function EvaluationsDetail() {
                 onClick={() => setActiveQuestionId(q.id)}
                 className={`flex-none lg:w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap lg:whitespace-normal ${
                   activeQuestionId === q.id
-                    ? "bg-indigo-50 text-indigo-700 font-medium"
+                    ? "bg-blue-50 text-blue-700 font-medium"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -251,7 +251,7 @@ export default function EvaluationsDetail() {
                     {/* Model Header */}
                     <div className="p-3 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
                       <div className="flex items-center gap-2 truncate">
-                        <div className="h-6 w-6 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                        <div className="h-6 w-6 rounded bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
                           {model.name.charAt(0).toUpperCase()}
                         </div>
                         <span className="font-medium text-sm text-gray-900 truncate">{model.name}</span>
@@ -289,7 +289,7 @@ export default function EvaluationsDetail() {
                             <span className="text-gray-400 italic">生成中...</span>
                           )}
                           {result.status === 'running' && (
-                            <span className="inline-block w-2 h-4 bg-indigo-400 ml-1 animate-pulse align-middle"></span>
+                            <span className="inline-block w-2 h-4 bg-blue-400 ml-1 animate-pulse align-middle"></span>
                           )}
                         </div>
                       )}

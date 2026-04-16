@@ -54,7 +54,7 @@ export default function EvaluationsList() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
-            <ListIcon className="w-6 h-6 text-indigo-600" />
+            <ListIcon className="w-6 h-6 text-blue-600" />
             测评中心
           </h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -63,7 +63,7 @@ export default function EvaluationsList() {
         </div>
         <button
           onClick={() => navigate("/evaluations/new")}
-          className="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors focus:ring-4 focus:ring-indigo-100"
+          className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors focus:ring-4 focus:ring-blue-100"
         >
           <Plus className="w-4 h-4 mr-2" />
           创建测评
@@ -82,7 +82,7 @@ export default function EvaluationsList() {
               placeholder="搜索测评任务名称..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
             />
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function EvaluationsList() {
           <div className="md:hidden divide-y divide-gray-200">
             {loading && tasks.length === 0 ? (
               <div className="p-8 text-center text-gray-500 flex flex-col items-center">
-                <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+                <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
                 <p>加载中...</p>
               </div>
             ) : filteredTasks.length === 0 ? (
@@ -117,7 +117,7 @@ export default function EvaluationsList() {
                     <span>{new Date(task.createdAt).toLocaleString()}</span>
                     <button
                       onClick={() => navigate(`/evaluations/${task.id}`)}
-                      className="text-indigo-600 hover:text-indigo-900 transition-colors inline-flex items-center font-medium"
+                      className="text-blue-600 hover:text-blue-900 transition-colors inline-flex items-center font-medium"
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       详情
@@ -157,7 +157,7 @@ export default function EvaluationsList() {
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center justify-center">
-                      <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+                      <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
                       <p>加载中...</p>
                     </div>
                   </td>
@@ -193,7 +193,7 @@ export default function EvaluationsList() {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => navigate(`/evaluations/${task.id}`)}
-                        className="text-indigo-600 hover:text-indigo-900 transition-colors inline-flex items-center"
+                        className="text-blue-600 hover:text-blue-900 transition-colors inline-flex items-center"
                         title="查看详情"
                       >
                         <Eye className="w-4 h-4 mr-1" />

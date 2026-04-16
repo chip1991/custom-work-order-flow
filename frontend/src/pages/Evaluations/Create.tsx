@@ -96,7 +96,7 @@ export default function EvaluationsCreate() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="block w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors"
+              className="block w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
               placeholder="例如：主流大模型代码能力横向对比"
             />
           </div>
@@ -106,7 +106,7 @@ export default function EvaluationsCreate() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-900 flex items-center gap-2">
-                  <Cpu className="w-4 h-4 text-indigo-500" />
+                  <Cpu className="w-4 h-4 text-blue-500" />
                   选择模型 ({selectedModels.size}) <span className="text-red-500">*</span>
                 </label>
                 <button
@@ -115,7 +115,7 @@ export default function EvaluationsCreate() {
                     if (selectedModels.size === models.length) setSelectedModels(new Set());
                     else setSelectedModels(new Set(models.map(m => m.id)));
                   }}
-                  className="text-xs text-indigo-600 hover:text-indigo-800"
+                  className="text-xs text-blue-600 hover:text-blue-800"
                 >
                   {selectedModels.size === models.length ? '取消全选' : '全选'}
                 </button>
@@ -130,7 +130,7 @@ export default function EvaluationsCreate() {
                         type="checkbox"
                         checked={selectedModels.has(model.id)}
                         onChange={() => toggleModel(model.id)}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                       <div className="ml-3 flex flex-col">
                         <span className="text-sm font-medium text-gray-900">{model.name}</span>
@@ -146,7 +146,7 @@ export default function EvaluationsCreate() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-900 flex items-center gap-2">
-                  <HelpCircle className="w-4 h-4 text-indigo-500" />
+                  <HelpCircle className="w-4 h-4 text-blue-500" />
                   选择题目 ({selectedQuestions.size}) <span className="text-red-500">*</span>
                 </label>
                 <button
@@ -155,7 +155,7 @@ export default function EvaluationsCreate() {
                     if (selectedQuestions.size === questions.length) setSelectedQuestions(new Set());
                     else setSelectedQuestions(new Set(questions.map(q => q.id)));
                   }}
-                  className="text-xs text-indigo-600 hover:text-indigo-800"
+                  className="text-xs text-blue-600 hover:text-blue-800"
                 >
                   {selectedQuestions.size === questions.length ? '取消全选' : '全选'}
                 </button>
@@ -170,7 +170,7 @@ export default function EvaluationsCreate() {
                         type="checkbox"
                         checked={selectedQuestions.has(question.id)}
                         onChange={() => toggleQuestion(question.id)}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                       <div className="ml-3 flex flex-col">
                         <span className="text-sm font-medium text-gray-900">{question.name}</span>
@@ -187,14 +187,14 @@ export default function EvaluationsCreate() {
             <button
               type="button"
               onClick={() => navigate("/evaluations")}
-              className="w-full sm:w-auto px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="w-full sm:w-auto px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               取消
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>

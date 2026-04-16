@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Mail, Smartphone } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { login } from "@/lib/api";
 
 export default function Home() {
@@ -125,9 +125,9 @@ export default function Home() {
           </div>
           <div className="text-[13px] text-[#1a1a1a] leading-relaxed select-none cursor-pointer" onClick={() => setAgreed(!agreed)}>
             我已阅读并同意{" "}
-            <a href="#" className="text-[#51b13e] hover:underline" onClick={e => e.stopPropagation()}>用户服务协议</a>
+            <Link to="/docs/policy" target="_blank" rel="noopener noreferrer" className="text-[#51b13e] hover:underline" onClick={e => e.stopPropagation()}>用户服务协议</Link>
             {" "}和{" "}
-            <a href="#" className="text-[#51b13e] hover:underline" onClick={e => e.stopPropagation()}>隐私政策</a>
+            <Link to="/docs/privacy" target="_blank" rel="noopener noreferrer" className="text-[#51b13e] hover:underline" onClick={e => e.stopPropagation()}>隐私政策</Link>
           </div>
         </div>
 

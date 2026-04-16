@@ -10,11 +10,16 @@ import EvaluationsList from "@/pages/Evaluations/List";
 import EvaluationsCreate from "@/pages/Evaluations/Create";
 import EvaluationsDetail from "@/pages/Evaluations/Detail";
 
+import DocumentPage from "@/pages/Document";
+
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Home />} />
+        
+        {/* Public Documents */}
+        <Route path="/docs/:type" element={<DocumentPage />} />
         
         {/* Main Application Layout */}
         <Route path="/" element={<Layout />}>

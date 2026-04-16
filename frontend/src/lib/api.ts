@@ -1,5 +1,18 @@
 export const API_BASE_URL = "http://localhost:3001/api";
 
+export const login = async (identifier: string, password: string) => {
+  const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ identifier, password }),
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "Login failed");
+  }
+  return res.json();
+};
+
 export interface Model {
   id: string;
   name: string;

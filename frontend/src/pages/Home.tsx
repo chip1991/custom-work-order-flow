@@ -1,24 +1,51 @@
 import { useState } from "react";
 import { Mail, Smartphone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { login } from "@/lib/api";
 
 export default function Home() {
-  const [loginMethod, setLoginMethod] = useState<"phone" | "email">("phone");
+  const navigate = useNavigate();
+  const [loginMethod, setLoginMethod] = useState<"phone" | "email">("email");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [error, setError] = useState("");
 
   const isPhoneValid = phone.length > 0 && code.length > 0 && agreed;
-  const isEmailValid = email.length > 0 && password.length > 0 && agreed;
+  const isEmailValid = identifier.length > 0 && password.length > 0 && agreed;
   const isValid = loginMethod === "phone" ? isPhoneValid : isEmailValid;
+
+  const handleLogin = async () => {
+    if (!isValid) return;
+    setError("");
+    try {
+      if (loginMethod === "email") {
+        const data = await login(identifier, password);
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/");
+      } else {
+        setError("手机号登录暂未实现");
+      }
+    } catch (err: any) {
+      setError(err.message || "登录失败");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white font-sans text-[#1a1a1a]">
       <div className="w-full max-w-[360px] px-6 pb-20">
         <h1 className="text-[26px] font-medium text-center mb-10">
-          {loginMethod === "phone" ? "手机号登录" : "邮箱登录"}
+          {loginMethod === "phone" ? "手机号登录" : "账号/邮箱登录"}
         </h1>
+
+        {error && (
+          <div className="mb-4 text-sm text-red-500 text-center bg-red-50 p-2 rounded">
+            {error}
+          </div>
+        )}
 
         {loginMethod === "phone" ? (
           <div className="space-y-[14px]">
@@ -52,11 +79,11 @@ export default function Home() {
           <div className="space-y-[14px]">
             <div className="h-[48px] bg-[#f7f8fa] rounded-full flex items-center px-5 focus-within:ring-1 focus-within:ring-[#e5e5e5] transition-all">
               <input
-                type="email"
-                placeholder="请输入邮箱"
+                type="text"
+                placeholder="请输入账号或邮箱"
                 className="bg-transparent w-full outline-none text-[15px] placeholder:text-[#b2b2b2]"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
               />
             </div>
             <div className="h-[48px] bg-[#f7f8fa] rounded-full flex items-center px-5 focus-within:ring-1 focus-within:ring-[#e5e5e5] transition-all">
@@ -72,6 +99,7 @@ export default function Home() {
         )}
 
         <button
+          onClick={handleLogin}
           className={`w-full h-[48px] rounded-full mt-6 text-[16px] transition-colors ${
             isValid
               ? "bg-[#1a1a1a] text-white hover:bg-black"
@@ -79,7 +107,7 @@ export default function Home() {
           }`}
           disabled={!isValid}
         >
-          登录/注册
+          登录
         </button>
 
         <div className="mt-4 flex items-start justify-center gap-1.5 px-4">

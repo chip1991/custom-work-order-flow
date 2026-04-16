@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Clock, Zap, AlertCircle, PlayCircle, CheckCircle2 } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Clock, 
+  Zap, 
+  CheckCircle2, 
+  XCircle, 
+  PlayCircle,
+  AlertCircle,
+  Cpu,
+  HelpCircle,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp
+} from "lucide-react";
 import { getTask, Task, TaskResult } from "@/api/tasks";
 
 export default function EvaluationsDetail() {
@@ -12,6 +25,7 @@ export default function EvaluationsDetail() {
   const [activeQuestionId, setActiveQuestionId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isContextExpanded, setIsContextExpanded] = useState(false);
   
   // Ref for the SSE EventSource
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -188,7 +202,13 @@ export default function EvaluationsDetail() {
   };
 
   // Get results for the active question
-  const activeQuestionResults = Object.values(results).filter(r => r.questionId === activeQuestionId);
+  const activeQuestionResults = Object.values(results).filter(
+    r => r.questionId === activeQuestionId
+  );
+
+  // Get messages context for the active question
+  const activeQuestion = task.questions?.find(q => q.id === activeQuestionId);
+  const activeQuestionMessages = activeQuestion?.messages || [];
 
   return (
     <div className="h-full flex flex-col space-y-6">
@@ -237,8 +257,60 @@ export default function EvaluationsDetail() {
         <div className="flex-1 flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-w-0">
           <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
             <h2 className="font-semibold text-gray-900 truncate">
-              {task.questions?.find(q => q.id === activeQuestionId)?.name || '横向对比'}
+              {activeQuestion?.name || '横向对比'}
             </h2>
+          </div>
+          
+          {/* Context / Messages Display Area */}
+          <div className="border-b border-gray-200 bg-white flex-shrink-0">
+            <button
+              onClick={() => setIsContextExpanded(!isContextExpanded)}
+              className="w-full flex items-center justify-between p-3 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center font-medium">
+                <MessageSquare className="w-4 h-4 mr-2 text-gray-400" />
+                查看题目上下文 (共 {activeQuestionMessages.length} 轮对话)
+              </div>
+              {isContextExpanded ? (
+                <ChevronUp className="w-4 h-4 text-gray-400" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-gray-400" />
+              )}
+            </button>
+            
+            {isContextExpanded && (
+              <div className="p-4 pt-0 bg-gray-50/30 max-h-64 overflow-y-auto border-t border-gray-100">
+                <div className="space-y-4 mt-4">
+                  {activeQuestionMessages.map((msg, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`flex flex-col max-w-[85%] ${
+                        msg.role === 'user' ? 'ml-auto items-end' : 
+                        msg.role === 'system' ? 'mx-auto items-center max-w-full' : 
+                        'mr-auto items-start'
+                      }`}
+                    >
+                      {msg.role !== 'system' && (
+                        <span className="text-xs text-gray-400 mb-1 capitalize">
+                          {msg.role}
+                        </span>
+                      )}
+                      <div 
+                        className={`px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap font-sans leading-relaxed ${
+                          msg.role === 'user' 
+                            ? 'bg-blue-600 text-white rounded-tr-sm' 
+                            : msg.role === 'system'
+                            ? 'bg-gray-100 text-gray-500 text-xs px-6 rounded-full border border-gray-200'
+                            : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-tl-sm'
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex-1 overflow-x-hidden overflow-y-auto lg:overflow-x-auto lg:overflow-y-hidden bg-gray-50">

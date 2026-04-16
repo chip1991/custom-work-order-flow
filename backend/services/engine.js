@@ -62,18 +62,11 @@ class EvaluationEngine {
 
       this.broadcast(taskId, { type: 'task_started', taskId });
 
-      // 2. Initialize memory for each model to maintain multi-turn dialogue context
-      const modelHistories = new Map();
-      for (const model of task.models) {
-        modelHistories.set(model.id, []);
-      }
-
-      // 3. Serially iterate through each question
-      for (let i = 0; i < task.questions.length; i++) {
-        const question = task.questions[i];
-        
-        // Prepare promises for all models for the current question
-        const promises = task.models.map(async (model) => {
+      // 2. Models run concurrently, but each model executes questions serially
+      const modelPromises = task.models.map(async (model) => {
+        for (let i = 0; i < task.questions.length; i++) {
+          const question = task.questions[i];
+          
           // Create task result record
           const result = await prisma.taskResult.create({
             data: {
@@ -86,36 +79,24 @@ class EvaluationEngine {
           
           const combo = { model, question, resultId: result.id };
           
-          // Get previous history for this model
-          const history = modelHistories.get(model.id);
-          
-          // Get current question messages
+          // Get current question messages (contains the multi-turn dialogue context for this question)
           const currentMessages = question.messages.map(m => ({
             role: m.role,
             content: m.content
           }));
           
-          // Combine history and current messages
-          const customMessages = [...history, ...currentMessages];
+          // Run evaluation using only the current question's multi-turn context
+          await this.runEvaluation(taskId, combo, currentMessages);
           
-          // Run evaluation
-          const responseText = await this.runEvaluation(taskId, combo, customMessages);
-          
-          // If successful, append the current messages and the model's response to the history
-          if (responseText) {
-            history.push(...currentMessages);
-            history.push({ role: 'assistant', content: responseText });
+          // Wait 10 seconds before proceeding to the next question for this model, unless it's the last question
+          if (i < task.questions.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 10000));
           }
-        });
-        
-        // Concurrently run evaluations for all models on this single question
-        await Promise.allSettled(promises);
-        
-        // Wait 10 seconds before proceeding to the next question, unless it's the last question
-        if (i < task.questions.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 10000));
         }
-      }
+      });
+
+      // 3. Wait for all models to finish all their questions
+      await Promise.allSettled(modelPromises);
 
       // 4. Update task to completed
       await prisma.task.update({

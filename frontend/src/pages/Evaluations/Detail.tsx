@@ -261,110 +261,102 @@ export default function EvaluationsDetail() {
             </h2>
           </div>
           
-          {/* Context / Messages Display Area */}
-          <div className="border-b border-gray-200 bg-white flex-shrink-0">
-            <button
-              onClick={() => setIsContextExpanded(!isContextExpanded)}
-              className="w-full flex items-center justify-between p-3 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center font-medium">
-                <MessageSquare className="w-4 h-4 mr-2 text-gray-400" />
-                查看题目上下文 (共 {activeQuestionMessages.length} 轮对话)
-              </div>
-              {isContextExpanded ? (
-                <ChevronUp className="w-4 h-4 text-gray-400" />
-              ) : (
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              )}
-            </button>
-            
-            {isContextExpanded && (
-              <div className="p-4 pt-0 bg-gray-50/30 max-h-64 overflow-y-auto border-t border-gray-100">
-                <div className="space-y-4 mt-4">
-                  {activeQuestionMessages.map((msg, idx) => (
-                    <div 
-                      key={idx} 
-                      className={`flex flex-col max-w-[85%] ${
-                        msg.role === 'user' ? 'ml-auto items-end' : 
-                        msg.role === 'system' ? 'mx-auto items-center max-w-full' : 
-                        'mr-auto items-start'
-                      }`}
-                    >
-                      {msg.role !== 'system' && (
-                        <span className="text-xs text-gray-400 mb-1 capitalize">
-                          {msg.role}
-                        </span>
-                      )}
-                      <div 
-                        className={`px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap font-sans leading-relaxed ${
-                          msg.role === 'user' 
-                            ? 'bg-blue-600 text-white rounded-tr-sm' 
-                            : msg.role === 'system'
-                            ? 'bg-gray-100 text-gray-500 text-xs px-6 rounded-full border border-gray-200'
-                            : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-tl-sm'
-                        }`}
-                      >
-                        {msg.content}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          
+          {/* Results Matrix */}
           <div className="flex-1 overflow-x-hidden overflow-y-auto lg:overflow-x-auto lg:overflow-y-hidden bg-gray-50">
             <div className="flex flex-col lg:flex-row lg:h-full lg:min-w-max p-4 gap-4">
               {task.models?.map(model => {
                 const result = activeQuestionResults.find(r => r.modelId === model.id);
                 
                 return (
-                  <div key={model.id} className="w-full lg:w-80 xl:w-96 flex flex-col bg-white rounded-xl border border-gray-200 overflow-hidden shrink-0 min-h-[300px] lg:min-h-0 shadow-sm">
-                    {/* Model Header */}
-                    <div className="p-3 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
-                      <div className="flex items-center gap-2 truncate">
-                        <div className="h-6 w-6 rounded bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
-                          {model.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="font-medium text-sm text-gray-900 truncate">{model.name}</span>
+                  <div key={model.id} className="w-full lg:w-80 xl:w-96 flex flex-col shrink-0 min-h-[300px] lg:min-h-0 px-2">
+                    
+                    {/* 1. 发送者信息 (头像与模型名称) */}
+                    <div className="flex items-center gap-2 mb-1.5 ml-1">
+                      <div className="h-6 w-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                        {model.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{model.provider}</span>
+                      <span className="text-xs text-gray-500 font-medium">{model.name}</span>
+                      <span className="text-[10px] text-gray-400 px-1.5 py-0.5 bg-gray-200/50 rounded-full">
+                        {model.provider}
+                      </span>
                     </div>
                     
-                    {/* Metrics Header */}
-                    <div className="px-3 py-2 bg-gray-100 border-b border-gray-200 flex justify-between text-xs text-gray-500">
-                      <div className="flex items-center gap-1" title="首字响应时间">
-                        <Zap className="w-3 h-3 text-yellow-500" />
-                        {result?.firstTokenTime ? `${result.firstTokenTime}ms` : '-'}
-                      </div>
-                      <div className="flex items-center gap-1" title="总耗时">
-                        <Clock className="w-3 h-3 text-blue-500" />
-                        {result?.timeTaken ? `${result.timeTaken}ms` : '-'}
-                      </div>
-                    </div>
-                    
-                    {/* Response Body */}
-                    <div className="flex-1 p-4 overflow-y-auto bg-white text-sm text-gray-700 relative">
-                      {!result ? (
-                        <div className="flex items-center justify-center h-full text-gray-400">
-                          等待评测开始...
-                        </div>
-                      ) : result.status === 'error' ? (
-                        <div className="text-red-500 flex flex-col items-center justify-center h-full text-center">
-                          <AlertCircle className="w-8 h-8 mb-2 opacity-50" />
-                          <p>生成失败</p>
-                          <p className="text-xs mt-1 opacity-70">{result.error}</p>
-                        </div>
-                      ) : (
-                        <div className="whitespace-pre-wrap font-mono text-xs leading-relaxed">
-                          {result.response || (
-                            <span className="text-gray-400 italic">生成中...</span>
+                    {/* 2. 对话气泡主体 */}
+                    <div className="flex flex-col mr-auto items-start w-full bg-transparent overflow-y-auto pb-4">
+                      <div className="space-y-4 w-full">
+                        {/* 渲染题目的历史对话记录（发起对话） */}
+                        {activeQuestionMessages.map((msg, idx) => (
+                          <div 
+                            key={`msg-${idx}`} 
+                            className={`flex flex-col max-w-[90%] ${
+                              msg.role === 'user' ? 'ml-auto items-end' : 
+                              msg.role === 'system' ? 'mx-auto items-center max-w-full' : 
+                              'mr-auto items-start'
+                            }`}
+                          >
+                            {msg.role !== 'system' && (
+                              <span className="text-xs text-gray-400 mb-1 capitalize">
+                                {msg.role}
+                              </span>
+                            )}
+                            <div 
+                              className={`px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap font-sans leading-relaxed ${
+                                msg.role === 'user' 
+                                  ? 'bg-blue-600 text-white rounded-tr-sm' 
+                                  : msg.role === 'system'
+                                  ? 'bg-gray-100 text-gray-500 text-xs px-6 rounded-full border border-gray-200'
+                                  : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-tl-sm'
+                              }`}
+                            >
+                              {msg.content}
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {/* 渲染当前大模型的最终回复 */}
+                        <div className="flex flex-col max-w-[90%] mr-auto items-start w-full">
+                          <span className="text-xs text-gray-400 mb-1 capitalize">
+                            assistant
+                          </span>
+                          <div className="px-4 py-3 rounded-2xl bg-white text-gray-800 border border-gray-200 shadow-sm rounded-tl-sm w-full relative">
+                            {!result ? (
+                              <div className="text-gray-400 italic text-sm">等待评测开始...</div>
+                            ) : result.status === 'error' ? (
+                              <div className="text-red-500 flex items-center gap-2 text-sm">
+                                <AlertCircle className="w-4 h-4" />
+                                <span>生成失败: {result.error}</span>
+                              </div>
+                            ) : (
+                              <div className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
+                                {result.response || (
+                                  <span className="text-gray-400 italic">生成中...</span>
+                                )}
+                                {result.status === 'running' && (
+                                  <span className="inline-block w-2 h-4 bg-blue-400 ml-1 animate-pulse align-middle"></span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* 3. 底部指标信息 (类似消息时间戳) */}
+                          {result && result.status !== 'error' && (
+                            <div className="flex items-center gap-3 mt-1.5 ml-2 text-[11px] text-gray-400">
+                              {result.firstTokenTime && (
+                                <span className="flex items-center gap-1" title="首字响应时间">
+                                  <Zap className="w-3 h-3 text-yellow-500" />
+                                  {result.firstTokenTime}ms
+                                </span>
+                              )}
+                              {result.timeTaken && (
+                                <span className="flex items-center gap-1" title="总耗时">
+                                  <Clock className="w-3 h-3 text-blue-400" />
+                                  {result.timeTaken}ms
+                                </span>
+                              )}
+                            </div>
                           )}
-                          {result.status === 'running' && (
-                            <span className="inline-block w-2 h-4 bg-blue-400 ml-1 animate-pulse align-middle"></span>
-                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 );

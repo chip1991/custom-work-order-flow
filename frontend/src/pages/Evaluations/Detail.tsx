@@ -27,6 +27,81 @@ interface TaskResultState extends TaskResult {
   messages?: Message[];
 }
 
+const MessageBubble = ({ msg, result, isLast }: { msg: Message, result: any, isLast: boolean }) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  useEffect(() => {
+    if (contentRef.current && !isExpanded) {
+      setIsTruncated(contentRef.current.scrollHeight > contentRef.current.clientHeight);
+    }
+  }, [msg.content, isExpanded]);
+
+  return (
+    <div 
+      className={`flex flex-col max-w-[90%] ${
+        msg.role === 'user' ? 'ml-auto items-end' : 
+        msg.role === 'system' ? 'mx-auto items-center max-w-full' : 
+        'mr-auto items-start'
+      }`}
+    >
+      {msg.role !== 'system' && (
+        <span className="text-xs text-gray-400 mb-1 capitalize">
+          {msg.role}
+        </span>
+      )}
+      <div 
+        className={`px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap font-sans leading-relaxed relative ${
+          msg.role === 'user' 
+            ? 'bg-blue-600 text-white rounded-tr-sm' 
+            : msg.role === 'system'
+            ? 'bg-gray-100 text-gray-500 text-xs px-6 rounded-full border border-gray-200'
+            : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-tl-sm w-full'
+        }`}
+      >
+        <div
+          ref={contentRef}
+          className={`${!isExpanded ? 'line-clamp-6' : ''} break-words`}
+        >
+          {msg.content || (msg.role === 'assistant' && result?.status === 'running' ? <span className="text-gray-400 italic">生成中...</span> : '')}
+          {msg.role === 'assistant' && result?.status === 'running' && isLast && (
+            <span className="inline-block w-2 h-4 bg-blue-400 ml-1 animate-pulse align-middle"></span>
+          )}
+        </div>
+      </div>
+
+      {/* Turn Metrics & Actions */}
+      {((msg.role === 'assistant' && (msg.timeTaken || msg.firstTokenTime)) || isTruncated || isExpanded) && (
+        <div className={`flex items-center justify-between w-full mt-1.5 px-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+          <div className="flex items-center gap-3 text-[11px] text-gray-400">
+            {msg.role === 'assistant' && msg.firstTokenTime && (
+              <span className="flex items-center gap-1" title="首字响应时间">
+                <Zap className="w-3 h-3 text-yellow-500" />
+                {msg.firstTokenTime}ms
+              </span>
+            )}
+            {msg.role === 'assistant' && msg.timeTaken && (
+              <span className="flex items-center gap-1" title="总耗时">
+                <Clock className="w-3 h-3 text-blue-400" />
+                {msg.timeTaken}ms
+              </span>
+            )}
+          </div>
+          {(isTruncated || isExpanded) && (
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-[11px] text-blue-500 hover:text-blue-700 font-medium ml-4 shrink-0"
+            >
+              {isExpanded ? '收起' : '展开更多'}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function EvaluationsDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -355,52 +430,12 @@ export default function EvaluationsDetail() {
                       <div className="space-y-4 w-full">
                         {/* 渲染多轮对话 */}
                         {displayMessages.map((msg, idx) => (
-                          <div 
+                          <MessageBubble 
                             key={`msg-${idx}`} 
-                            className={`flex flex-col max-w-[90%] ${
-                              msg.role === 'user' ? 'ml-auto items-end' : 
-                              msg.role === 'system' ? 'mx-auto items-center max-w-full' : 
-                              'mr-auto items-start'
-                            }`}
-                          >
-                            {msg.role !== 'system' && (
-                              <span className="text-xs text-gray-400 mb-1 capitalize">
-                                {msg.role}
-                              </span>
-                            )}
-                            <div 
-                              className={`px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap font-sans leading-relaxed relative ${
-                                msg.role === 'user' 
-                                  ? 'bg-blue-600 text-white rounded-tr-sm' 
-                                  : msg.role === 'system'
-                                  ? 'bg-gray-100 text-gray-500 text-xs px-6 rounded-full border border-gray-200'
-                                  : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-tl-sm w-full'
-                              }`}
-                            >
-                              {msg.content || (msg.role === 'assistant' && result?.status === 'running' ? <span className="text-gray-400 italic">生成中...</span> : '')}
-                              {msg.role === 'assistant' && result?.status === 'running' && idx === displayMessages.length - 1 && (
-                                <span className="inline-block w-2 h-4 bg-blue-400 ml-1 animate-pulse align-middle"></span>
-                              )}
-                            </div>
-
-                            {/* Turn Metrics */}
-                            {msg.role === 'assistant' && (msg.timeTaken || msg.firstTokenTime) && (
-                              <div className="flex items-center gap-3 mt-1.5 ml-2 text-[11px] text-gray-400">
-                                {msg.firstTokenTime && (
-                                  <span className="flex items-center gap-1" title="首字响应时间">
-                                    <Zap className="w-3 h-3 text-yellow-500" />
-                                    {msg.firstTokenTime}ms
-                                  </span>
-                                )}
-                                {msg.timeTaken && (
-                                  <span className="flex items-center gap-1" title="总耗时">
-                                    <Clock className="w-3 h-3 text-blue-400" />
-                                    {msg.timeTaken}ms
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
+                            msg={msg} 
+                            result={result} 
+                            isLast={idx === displayMessages.length - 1} 
+                          />
                         ))}
 
                         {/* Status / Error display */}

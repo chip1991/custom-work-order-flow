@@ -313,16 +313,11 @@ export default function EvaluationsDetail() {
         </div>
 
         {/* Results Matrix */}
-        <div className="flex-1 flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-w-0">
-          <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
-            <h2 className="font-semibold text-gray-900 truncate">
-              {activeQuestion?.name || '横向对比'}
-            </h2>
-          </div>
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           
-          {/* Results Matrix */}
-          <div className="flex-1 overflow-x-hidden overflow-y-auto lg:overflow-x-auto lg:overflow-y-hidden bg-gray-50">
-            <div className="flex flex-col lg:flex-row lg:h-full lg:min-w-max p-4 gap-4">
+          {/* Results Matrix Wrapper */}
+          <div className="flex-1 overflow-x-hidden overflow-y-auto lg:overflow-x-auto lg:overflow-y-hidden">
+            <div className="flex flex-col lg:flex-row lg:h-full lg:min-w-max pb-4 gap-6">
               {task.models?.map(model => {
                 const result = activeQuestionResults.find(r => r.modelId === model.id);
                 
@@ -342,21 +337,21 @@ export default function EvaluationsDetail() {
                 }
                 
                 return (
-                  <div key={model.id} className="w-full lg:w-80 xl:w-96 flex flex-col shrink-0 min-h-[300px] lg:min-h-0 px-2">
+                  <div key={model.id} className="w-full lg:w-80 xl:w-96 flex flex-col shrink-0 min-h-[300px] lg:min-h-0 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     
-                    {/* 1. 发送者信息 (头像与模型名称) */}
-                    <div className="flex items-center gap-2 mb-1.5 ml-1">
+                    {/* 1. 发送者信息 (头像与模型名称) - Now the Card Header */}
+                    <div className="p-3 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
                       <div className="h-6 w-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
                         {model.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-xs text-gray-500 font-medium">{model.name}</span>
-                      <span className="text-[10px] text-gray-400 px-1.5 py-0.5 bg-gray-200/50 rounded-full">
+                      <span className="text-sm text-gray-700 font-semibold">{model.name}</span>
+                      <span className="text-[10px] text-gray-400 px-1.5 py-0.5 bg-gray-200/50 rounded-full ml-auto">
                         {model.provider}
                       </span>
                     </div>
                     
-                    {/* 2. 对话气泡主体 */}
-                    <div className="flex-1 flex flex-col mr-auto items-start w-full bg-transparent overflow-y-auto pb-4">
+                    {/* 2. 对话气泡主体 - Inside the Card */}
+                    <div className="flex-1 flex flex-col mr-auto items-start w-full bg-transparent overflow-y-auto p-4">
                       <div className="space-y-4 w-full">
                         {/* 渲染多轮对话 */}
                         {displayMessages.map((msg, idx) => (

@@ -19,6 +19,8 @@ import { getTask, Task, TaskResult } from "@/api/tasks";
 export interface Message {
   role: string;
   content: string;
+  timeTaken?: number;
+  firstTokenTime?: number;
 }
 
 interface TaskResultState extends TaskResult {
@@ -163,6 +165,27 @@ export default function EvaluationsDetail() {
               response: (result.response || '') + data.content,
               messages: msgs,
               status: 'running'
+            }
+          };
+        });
+        break;
+      case 'turn_completed':
+        setResults(prev => {
+          const result = prev[data.resultId];
+          if (!result) return prev;
+          const msgs = result.messages ? [...result.messages] : [];
+          if (msgs.length > 0 && msgs[msgs.length - 1].role === 'assistant') {
+            msgs[msgs.length - 1] = { 
+              ...msgs[msgs.length - 1], 
+              timeTaken: data.timeTaken,
+              firstTokenTime: data.firstTokenTime
+            };
+          }
+          return {
+            ...prev,
+            [data.resultId]: {
+              ...result,
+              messages: msgs
             }
           };
         });
@@ -367,6 +390,24 @@ export default function EvaluationsDetail() {
                                 <span className="inline-block w-2 h-4 bg-blue-400 ml-1 animate-pulse align-middle"></span>
                               )}
                             </div>
+
+                            {/* Turn Metrics */}
+                            {msg.role === 'assistant' && (msg.timeTaken || msg.firstTokenTime) && (
+                              <div className="flex items-center gap-3 mt-1.5 ml-2 text-[11px] text-gray-400">
+                                {msg.firstTokenTime && (
+                                  <span className="flex items-center gap-1" title="首字响应时间">
+                                    <Zap className="w-3 h-3 text-yellow-500" />
+                                    {msg.firstTokenTime}ms
+                                  </span>
+                                )}
+                                {msg.timeTaken && (
+                                  <span className="flex items-center gap-1" title="总耗时">
+                                    <Clock className="w-3 h-3 text-blue-400" />
+                                    {msg.timeTaken}ms
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
                         ))}
 
@@ -377,24 +418,6 @@ export default function EvaluationsDetail() {
                               <AlertCircle className="w-4 h-4 inline mr-2" />
                               生成失败: {result.error}
                             </div>
-                          </div>
-                        )}
-                          
-                        {/* 3. 底部指标信息 (类似消息时间戳) */}
-                        {result && result.status !== 'error' && result.status !== 'running' && (
-                          <div className="flex items-center gap-3 mt-1.5 ml-2 text-[11px] text-gray-400">
-                            {result.firstTokenTime && (
-                              <span className="flex items-center gap-1" title="首字响应时间">
-                                <Zap className="w-3 h-3 text-yellow-500" />
-                                {result.firstTokenTime}ms
-                              </span>
-                            )}
-                            {result.timeTaken && (
-                              <span className="flex items-center gap-1" title="总耗时">
-                                <Clock className="w-3 h-3 text-blue-400" />
-                                {result.timeTaken}ms
-                              </span>
-                            )}
                           </div>
                         )}
                       </div>

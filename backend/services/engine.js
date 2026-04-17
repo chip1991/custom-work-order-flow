@@ -100,7 +100,22 @@ class EvaluationEngine {
               try {
                 // Pass fullHistory as the context up to this point
                 const res = await this.runEvaluationStream(taskId, combo, fullHistory);
-                fullHistory.push({ role: 'assistant', content: res.fullResponse });
+                fullHistory.push({ 
+                  role: 'assistant', 
+                  content: res.fullResponse,
+                  timeTaken: res.timeTaken,
+                  firstTokenTime: res.firstTokenTime
+                });
+                
+                this.broadcast(taskId, {
+                  type: 'turn_completed',
+                  resultId: result.id,
+                  modelId: model.id,
+                  questionId: question.id,
+                  timeTaken: res.timeTaken,
+                  firstTokenTime: res.firstTokenTime
+                });
+                
                 totalTimeTaken += res.timeTaken;
                 if (!firstTokenTime) firstTokenTime = res.firstTokenTime;
               } catch (error) {

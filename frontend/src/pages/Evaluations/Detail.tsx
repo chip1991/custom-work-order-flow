@@ -292,24 +292,21 @@ export default function EvaluationsDetail() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
+      <div className="flex-1 flex flex-col gap-6 min-h-0">
         {/* Questions Sidebar / Mobile Top Tabs */}
-        <div className="w-full lg:w-64 flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden shrink-0">
-          <div className="p-4 border-b border-gray-200 bg-gray-50/50 hidden lg:block">
-            <h2 className="font-semibold text-gray-900">测评题目</h2>
-          </div>
-          <div className="flex lg:flex-col overflow-x-auto lg:overflow-y-auto p-2 space-x-2 lg:space-x-0 lg:space-y-1">
+        <div className="w-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden shrink-0">
+          <div className="flex overflow-x-auto p-2 space-x-2">
             {task.questions?.map(q => (
               <button
                 key={q.id}
                 onClick={() => setActiveQuestionId(q.id)}
-                className={`flex-none lg:w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap lg:whitespace-normal ${
+                className={`flex-none text-left px-3 py-2.5 rounded-lg text-sm transition-colors whitespace-nowrap ${
                   activeQuestionId === q.id
                     ? "bg-blue-50 text-blue-700 font-medium"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
               >
-                <div className="truncate max-w-[200px] lg:max-w-none">{q.name}</div>
+                <div className="truncate max-w-[200px]">{q.name}</div>
               </button>
             ))}
           </div>

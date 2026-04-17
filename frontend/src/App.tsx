@@ -26,6 +26,7 @@ export default function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/models" replace />} />
           <Route path="models" element={<Models />} />
+          <Route path="agents" element={<Agents />} />
           
           <Route path="datasets" element={<Datasets />} />
           <Route path="datasets/new" element={<DatasetEditor />} />

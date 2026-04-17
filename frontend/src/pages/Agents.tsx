@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Search, Plus, Edit2, Trash2, Bot, Cpu } from "lucide-react";
 import { Agent, getAgents, deleteAgent } from "@/api/agents";
-import AgentModal from "./AgentModal";
+import AgentModal from "@/components/AgentModal";
 
 export default function Agents() {
   const [agents, setAgents] = useState<Agent[]>([]);

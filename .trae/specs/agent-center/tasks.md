@@ -6,10 +6,10 @@
   - [x] SubTask 1.3: 编写 `backend/routes/agents.js`，实现智能体的增删改查 (CRUD) 接口。
   - [x] SubTask 1.4: 在 `backend/server.js` 中注册 `/api/agents` 路由。
 
-- [ ] Task 2: 前端基础建设
-  - [ ] SubTask 2.1: 编写 `frontend/src/api/agents.ts` 封装与后端的交互请求。
-  - [ ] SubTask 2.2: 在 `frontend/src/components/Layout.tsx` 的侧边栏导航中新增“智能体中心”菜单项。
-  - [ ] SubTask 2.3: 在 `frontend/src/App.tsx` 中注册 `/agents` 路由。
+- [x] Task 2: 前端基础建设
+  - [x] SubTask 2.1: 编写 `frontend/src/api/agents.ts` 封装与后端的交互请求。
+  - [x] SubTask 2.2: 在 `frontend/src/components/Layout.tsx` 的侧边栏导航中新增“智能体中心”菜单项。
+  - [x] SubTask 2.3: 在 `frontend/src/App.tsx` 中注册 `/agents` 路由。
 
 - [ ] Task 3: 前端页面建设
   - [ ] SubTask 3.1: 开发 `frontend/src/pages/Agents.tsx` (智能体列表页)，展示已有智能体及其绑定的基础模型。

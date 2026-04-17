@@ -79,14 +79,74 @@ class EvaluationEngine {
           
           const combo = { model, question, resultId: result.id };
           
-          // Get current question messages (contains the multi-turn dialogue context for this question)
-          const currentMessages = question.messages.map(m => ({
-            role: m.role,
-            content: m.content
-          }));
-          
-          // Run evaluation using only the current question's multi-turn context
-          await this.runEvaluation(taskId, combo, currentMessages);
+          let fullHistory = [];
+          let totalTimeTaken = 0;
+          let firstTokenTime = null;
+          let hasError = false;
+          let errorMessage = '';
+
+          for (const msg of question.messages) {
+            fullHistory.push({ role: msg.role, content: msg.content });
+            this.broadcast(taskId, { 
+              type: 'message', 
+              resultId: result.id, 
+              modelId: model.id,
+              questionId: question.id,
+              role: msg.role, 
+              content: msg.content 
+            });
+            
+            if (msg.role === 'user') {
+              try {
+                // Pass fullHistory as the context up to this point
+                const res = await this.runEvaluationStream(taskId, combo, fullHistory);
+                fullHistory.push({ role: 'assistant', content: res.fullResponse });
+                totalTimeTaken += res.timeTaken;
+                if (!firstTokenTime) firstTokenTime = res.firstTokenTime;
+              } catch (error) {
+                console.error(`Evaluation failed for model ${model.name}, question ${question.name}:`, error);
+                hasError = true;
+                errorMessage = error.message || 'Unknown error';
+                break;
+              }
+            }
+          }
+
+          if (hasError) {
+            await prisma.taskResult.update({
+              where: { id: result.id },
+              data: {
+                status: 'error',
+                error: errorMessage,
+                response: JSON.stringify(fullHistory)
+              }
+            });
+            this.broadcast(taskId, {
+              type: 'result_error',
+              resultId: result.id,
+              modelId: model.id,
+              questionId: question.id,
+              error: errorMessage
+            });
+          } else {
+            await prisma.taskResult.update({
+              where: { id: result.id },
+              data: {
+                status: 'success',
+                response: JSON.stringify(fullHistory),
+                timeTaken: totalTimeTaken,
+                firstTokenTime
+              }
+            });
+            this.broadcast(taskId, {
+              type: 'result_completed',
+              resultId: result.id,
+              modelId: model.id,
+              questionId: question.id,
+              timeTaken: totalTimeTaken,
+              firstTokenTime
+            });
+          }
           
           // Wait 10 seconds before proceeding to the next question for this model, unless it's the last question
           if (i < task.questions.length - 1) {
@@ -115,103 +175,46 @@ class EvaluationEngine {
     }
   }
 
-  async runEvaluation(taskId, { model, question, resultId }, customMessages = null) {
+  async runEvaluationStream(taskId, { model, question, resultId }, messages) {
     const startTime = Date.now();
     let firstTokenTime = null;
     let fullResponse = '';
     
-    try {
-      // Prepare OpenAI client
-      const config = {
-        apiKey: model.apiKey || 'dummy-key',
-      };
-      if (model.baseUrl) {
-        config.baseURL = model.baseUrl;
-      }
-
-      const openai = new OpenAI(config);
-      
-      const messages = customMessages || question.messages.map(m => ({
-        role: m.role,
-        content: m.content
-      }));
-
-      // Start stream
-      const stream = await openai.chat.completions.create({
-        model: model.name,
-        messages,
-        stream: true,
-      });
-
-      for await (const chunk of stream) {
-        if (!firstTokenTime) {
-          firstTokenTime = Date.now() - startTime;
-        }
-        
-        const content = chunk.choices[0]?.delta?.content || '';
-        if (content) {
-          fullResponse += content;
-          // broadcast the chunk
-          this.broadcast(taskId, {
-            type: 'chunk',
-            resultId,
-            modelId: model.id,
-            questionId: question.id,
-            content
-          });
-        }
-      }
-
-      const timeTaken = Date.now() - startTime;
-
-      // Update TaskResult as success
-      await prisma.taskResult.update({
-        where: { id: resultId },
-        data: {
-          status: 'success',
-          response: fullResponse,
-          timeTaken,
-          firstTokenTime,
-          // tokensUsed: we'd need a tokenizer to count precisely, skip or estimate if needed
-        }
-      });
-
-      this.broadcast(taskId, {
-        type: 'result_completed',
-        resultId,
-        modelId: model.id,
-        questionId: question.id,
-        timeTaken,
-        firstTokenTime
-      });
-
-      return fullResponse;
-
-    } catch (error) {
-      console.error(`Evaluation failed for model ${model.name}, question ${question.name}:`, error);
-      const timeTaken = Date.now() - startTime;
-      
-      // Update TaskResult as error
-      await prisma.taskResult.update({
-        where: { id: resultId },
-        data: {
-          status: 'error',
-          error: error.message || 'Unknown error',
-          timeTaken,
-          firstTokenTime
-        }
-      });
-
-      this.broadcast(taskId, {
-        type: 'result_error',
-        resultId,
-        modelId: model.id,
-        questionId: question.id,
-        error: error.message || 'Unknown error'
-      });
-
-      return null;
+    const config = {
+      apiKey: model.apiKey || 'dummy-key',
+    };
+    if (model.baseUrl) {
+      config.baseURL = model.baseUrl;
     }
+
+    const openai = new OpenAI(config);
+    
+    const stream = await openai.chat.completions.create({
+      model: model.name,
+      messages,
+      stream: true,
+    });
+
+    for await (const chunk of stream) {
+      if (!firstTokenTime) {
+        firstTokenTime = Date.now() - startTime;
+      }
+      
+      const content = chunk.choices[0]?.delta?.content || '';
+      if (content) {
+        fullResponse += content;
+        this.broadcast(taskId, {
+          type: 'chunk',
+          resultId,
+          modelId: model.id,
+          questionId: question.id,
+          content
+        });
+      }
+    }
+
+    const timeTaken = Date.now() - startTime;
+    return { fullResponse, timeTaken, firstTokenTime };
   }
 }
 

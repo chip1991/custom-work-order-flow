@@ -16,12 +16,21 @@ import {
 } from "lucide-react";
 import { getTask, Task, TaskResult } from "@/api/tasks";
 
+export interface Message {
+  role: string;
+  content: string;
+}
+
+interface TaskResultState extends TaskResult {
+  messages?: Message[];
+}
+
 export default function EvaluationsDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
   const [task, setTask] = useState<Task | null>(null);
-  const [results, setResults] = useState<Record<string, TaskResult>>({}); // resultId -> TaskResult
+  const [results, setResults] = useState<Record<string, TaskResultState>>({}); // resultId -> TaskResultState
   const [activeQuestionId, setActiveQuestionId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,9 +53,9 @@ export default function EvaluationsDetail() {
         
         // Initialize results map
         if (data.results) {
-          const resultsMap: Record<string, TaskResult> = {};
+          const resultsMap: Record<string, TaskResultState> = {};
           data.results.forEach(r => {
-            resultsMap[r.id] = r;
+            resultsMap[r.id] = { ...r };
           });
           setResults(resultsMap);
         }
@@ -108,6 +117,28 @@ export default function EvaluationsDetail() {
         setTask(prev => prev ? { ...prev, status: 'failed' } : prev);
         if (eventSourceRef.current) eventSourceRef.current.close();
         break;
+      case 'message':
+        setResults(prev => {
+          const result = prev[data.resultId] || {
+            id: data.resultId,
+            taskId: task?.id || '',
+            modelId: data.modelId,
+            questionId: data.questionId,
+            response: '',
+            status: 'running',
+            messages: []
+          };
+          const msgs = result.messages ? [...result.messages] : [];
+          msgs.push({ role: data.role, content: data.content });
+          return {
+            ...prev,
+            [data.resultId]: {
+              ...result,
+              messages: msgs
+            }
+          };
+        });
+        break;
       case 'chunk':
         setResults(prev => {
           const result = prev[data.resultId] || {
@@ -116,13 +147,21 @@ export default function EvaluationsDetail() {
             modelId: data.modelId,
             questionId: data.questionId,
             response: '',
-            status: 'running'
+            status: 'running',
+            messages: []
           };
+          const msgs = result.messages ? [...result.messages] : [];
+          if (msgs.length === 0 || msgs[msgs.length - 1].role !== 'assistant') {
+            msgs.push({ role: 'assistant', content: data.content });
+          } else {
+            msgs[msgs.length - 1] = { ...msgs[msgs.length - 1], content: msgs[msgs.length - 1].content + data.content };
+          }
           return {
             ...prev,
             [data.resultId]: {
               ...result,
               response: (result.response || '') + data.content,
+              messages: msgs,
               status: 'running'
             }
           };
@@ -267,6 +306,21 @@ export default function EvaluationsDetail() {
               {task.models?.map(model => {
                 const result = activeQuestionResults.find(r => r.modelId === model.id);
                 
+                let displayMessages: Message[] = [];
+                if (result) {
+                  if (result.messages) {
+                    displayMessages = result.messages;
+                  } else if (result.response) {
+                    try {
+                      displayMessages = JSON.parse(result.response);
+                    } catch (e) {
+                      displayMessages = [...activeQuestionMessages, { role: 'assistant', content: result.response }];
+                    }
+                  }
+                } else {
+                  displayMessages = activeQuestionMessages.map(m => ({ role: m.role, content: m.content }));
+                }
+                
                 return (
                   <div key={model.id} className="w-full lg:w-80 xl:w-96 flex flex-col shrink-0 min-h-[300px] lg:min-h-0 px-2">
                     
@@ -282,10 +336,10 @@ export default function EvaluationsDetail() {
                     </div>
                     
                     {/* 2. 对话气泡主体 */}
-                    <div className="flex flex-col mr-auto items-start w-full bg-transparent overflow-y-auto pb-4">
+                    <div className="flex-1 flex flex-col mr-auto items-start w-full bg-transparent overflow-y-auto pb-4">
                       <div className="space-y-4 w-full">
-                        {/* 渲染题目的历史对话记录（发起对话） */}
-                        {activeQuestionMessages.map((msg, idx) => (
+                        {/* 渲染多轮对话 */}
+                        {displayMessages.map((msg, idx) => (
                           <div 
                             key={`msg-${idx}`} 
                             className={`flex flex-col max-w-[90%] ${
@@ -300,62 +354,49 @@ export default function EvaluationsDetail() {
                               </span>
                             )}
                             <div 
-                              className={`px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap font-sans leading-relaxed ${
+                              className={`px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap font-sans leading-relaxed relative ${
                                 msg.role === 'user' 
                                   ? 'bg-blue-600 text-white rounded-tr-sm' 
                                   : msg.role === 'system'
                                   ? 'bg-gray-100 text-gray-500 text-xs px-6 rounded-full border border-gray-200'
-                                  : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-tl-sm'
+                                  : 'bg-white text-gray-800 border border-gray-200 shadow-sm rounded-tl-sm w-full'
                               }`}
                             >
-                              {msg.content}
+                              {msg.content || (msg.role === 'assistant' && result?.status === 'running' ? <span className="text-gray-400 italic">生成中...</span> : '')}
+                              {msg.role === 'assistant' && result?.status === 'running' && idx === displayMessages.length - 1 && (
+                                <span className="inline-block w-2 h-4 bg-blue-400 ml-1 animate-pulse align-middle"></span>
+                              )}
                             </div>
                           </div>
                         ))}
-                        
-                        {/* 渲染当前大模型的最终回复 */}
-                        <div className="flex flex-col max-w-[90%] mr-auto items-start w-full">
-                          <span className="text-xs text-gray-400 mb-1 capitalize">
-                            assistant
-                          </span>
-                          <div className="px-4 py-3 rounded-2xl bg-white text-gray-800 border border-gray-200 shadow-sm rounded-tl-sm w-full relative">
-                            {!result ? (
-                              <div className="text-gray-400 italic text-sm">等待评测开始...</div>
-                            ) : result.status === 'error' ? (
-                              <div className="text-red-500 flex items-center gap-2 text-sm">
-                                <AlertCircle className="w-4 h-4" />
-                                <span>生成失败: {result.error}</span>
-                              </div>
-                            ) : (
-                              <div className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
-                                {result.response || (
-                                  <span className="text-gray-400 italic">生成中...</span>
-                                )}
-                                {result.status === 'running' && (
-                                  <span className="inline-block w-2 h-4 bg-blue-400 ml-1 animate-pulse align-middle"></span>
-                                )}
-                              </div>
+
+                        {/* Status / Error display */}
+                        {result?.status === 'error' && (
+                          <div className="flex flex-col max-w-[90%] mr-auto items-start w-full mt-2">
+                            <div className="px-4 py-3 rounded-2xl bg-red-50 text-red-600 border border-red-200 text-sm">
+                              <AlertCircle className="w-4 h-4 inline mr-2" />
+                              生成失败: {result.error}
+                            </div>
+                          </div>
+                        )}
+                          
+                        {/* 3. 底部指标信息 (类似消息时间戳) */}
+                        {result && result.status !== 'error' && result.status !== 'running' && (
+                          <div className="flex items-center gap-3 mt-1.5 ml-2 text-[11px] text-gray-400">
+                            {result.firstTokenTime && (
+                              <span className="flex items-center gap-1" title="首字响应时间">
+                                <Zap className="w-3 h-3 text-yellow-500" />
+                                {result.firstTokenTime}ms
+                              </span>
+                            )}
+                            {result.timeTaken && (
+                              <span className="flex items-center gap-1" title="总耗时">
+                                <Clock className="w-3 h-3 text-blue-400" />
+                                {result.timeTaken}ms
+                              </span>
                             )}
                           </div>
-                          
-                          {/* 3. 底部指标信息 (类似消息时间戳) */}
-                          {result && result.status !== 'error' && (
-                            <div className="flex items-center gap-3 mt-1.5 ml-2 text-[11px] text-gray-400">
-                              {result.firstTokenTime && (
-                                <span className="flex items-center gap-1" title="首字响应时间">
-                                  <Zap className="w-3 h-3 text-yellow-500" />
-                                  {result.firstTokenTime}ms
-                                </span>
-                              )}
-                              {result.timeTaken && (
-                                <span className="flex items-center gap-1" title="总耗时">
-                                  <Clock className="w-3 h-3 text-blue-400" />
-                                  {result.timeTaken}ms
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
                   </div>

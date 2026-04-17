@@ -1,17 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { Search, Plus, Edit2, Trash2, Bot, Cpu } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Agent, getAgents, deleteAgent } from "@/api/agents";
-import AgentModal from "@/components/AgentModal";
 
 export default function Agents() {
+  const navigate = useNavigate();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
 
   const loadAgents = async () => {
     try {
@@ -66,10 +64,7 @@ export default function Agents() {
           </p>
         </div>
         <button
-          onClick={() => {
-            setEditingAgent(null);
-            setIsModalOpen(true);
-          }}
+          onClick={() => navigate('/agents/new')}
           className="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors focus:ring-4 focus:ring-indigo-100"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -132,10 +127,7 @@ export default function Agents() {
                   </div>
                   <div className="flex items-center justify-end space-x-4 border-t border-gray-100 pt-3 mt-3">
                     <button
-                      onClick={() => {
-                        setEditingAgent(agent);
-                        setIsModalOpen(true);
-                      }}
+                      onClick={() => navigate(`/agents/${agent.id}/edit`)}
                       className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center"
                     >
                       <Edit2 className="w-4 h-4 mr-1" /> 编辑
@@ -214,10 +206,7 @@ export default function Agents() {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-3">
                         <button
-                          onClick={() => {
-                            setEditingAgent(agent);
-                            setIsModalOpen(true);
-                          }}
+                          onClick={() => navigate(`/agents/${agent.id}/edit`)}
                           className="text-indigo-600 hover:text-indigo-900 transition-colors"
                           title="编辑"
                         >
@@ -288,13 +277,6 @@ export default function Agents() {
           </div>
         )}
       </div>
-
-      <AgentModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={loadAgents}
-        editingAgent={editingAgent}
-      />
     </div>
   );
 }

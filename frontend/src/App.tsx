@@ -3,6 +3,7 @@ import Home from "@/pages/Home";
 import Layout from "@/components/Layout";
 import Models from "@/pages/Models";
 import Agents from "@/pages/Agents";
+import AgentEditor from "@/pages/Agents/Editor";
 
 import Datasets from "@/pages/Datasets";
 import DatasetEditor from "@/pages/Datasets/Editor";
@@ -27,6 +28,8 @@ export default function App() {
           <Route index element={<Navigate to="/models" replace />} />
           <Route path="models" element={<Models />} />
           <Route path="agents" element={<Agents />} />
+          <Route path="agents/new" element={<AgentEditor />} />
+          <Route path="agents/:id/edit" element={<AgentEditor />} />
           
           <Route path="datasets" element={<Datasets />} />
           <Route path="datasets/new" element={<DatasetEditor />} />

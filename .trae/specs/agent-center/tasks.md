@@ -11,9 +11,9 @@
   - [x] SubTask 2.2: 在 `frontend/src/components/Layout.tsx` 的侧边栏导航中新增“智能体中心”菜单项。
   - [x] SubTask 2.3: 在 `frontend/src/App.tsx` 中注册 `/agents` 路由。
 
-- [ ] Task 3: 前端页面建设
-  - [ ] SubTask 3.1: 开发 `frontend/src/pages/Agents.tsx` (智能体列表页)，展示已有智能体及其绑定的基础模型。
-  - [ ] SubTask 3.2: 开发 `frontend/src/components/AgentModal.tsx` (编辑/创建弹窗)，包含选择底座模型（下拉框）、配置 System Prompt 等表单字段。
+- [x] Task 3: 前端页面建设
+  - [x] SubTask 3.1: 开发 `frontend/src/pages/Agents.tsx` (智能体列表页)，展示已有智能体及其绑定的基础模型。
+  - [x] SubTask 3.2: 开发 `frontend/src/components/AgentModal.tsx` (编辑/创建弹窗)，包含选择底座模型（下拉框）、配置 System Prompt 等表单字段。
 
 # Task Dependencies
 - Task 2 depends on Task 1

@@ -13,7 +13,10 @@ router.get('/', async (req, res) => {
       },
       orderBy: { createdAt: 'desc' }
     });
-    res.json(agents);
+    res.json(agents.map(agent => ({
+      ...agent,
+      workflow: agent.workflow ? JSON.parse(agent.workflow) : null
+    })));
   } catch (error) {
     console.error('Error fetching agents:', error);
     res.status(500).json({ error: 'Failed to fetch agents' });
@@ -33,7 +36,10 @@ router.get('/:id', async (req, res) => {
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found' });
     }
-    res.json(agent);
+    res.json({
+      ...agent,
+      workflow: agent.workflow ? JSON.parse(agent.workflow) : null
+    });
   } catch (error) {
     console.error('Error fetching agent:', error);
     res.status(500).json({ error: 'Failed to fetch agent' });
@@ -43,7 +49,7 @@ router.get('/:id', async (req, res) => {
 // Create a new agent
 router.post('/', async (req, res) => {
   try {
-    const { name, description, systemPrompt, modelId } = req.body;
+    const { name, description, systemPrompt, modelId, workflow } = req.body;
     
     // Validate required fields
     if (!name || !modelId) {
@@ -61,13 +67,17 @@ router.post('/', async (req, res) => {
         name,
         description,
         systemPrompt,
-        modelId
+        modelId,
+        workflow: workflow ? JSON.stringify(workflow) : null
       },
       include: {
         model: true
       }
     });
-    res.status(201).json(agent);
+    res.status(201).json({
+      ...agent,
+      workflow: agent.workflow ? JSON.parse(agent.workflow) : null
+    });
   } catch (error) {
     console.error('Error creating agent:', error);
     res.status(500).json({ error: 'Failed to create agent' });
@@ -78,7 +88,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, systemPrompt, modelId } = req.body;
+    const { name, description, systemPrompt, modelId, workflow } = req.body;
     
     // Check if agent exists
     const existingAgent = await prisma.agent.findUnique({ where: { id } });
@@ -99,13 +109,17 @@ router.put('/:id', async (req, res) => {
         name: name !== undefined ? name : existingAgent.name,
         description: description !== undefined ? description : existingAgent.description,
         systemPrompt: systemPrompt !== undefined ? systemPrompt : existingAgent.systemPrompt,
-        modelId: modelId !== undefined ? modelId : existingAgent.modelId
+        modelId: modelId !== undefined ? modelId : existingAgent.modelId,
+        workflow: workflow !== undefined ? (workflow ? JSON.stringify(workflow) : null) : existingAgent.workflow
       },
       include: {
         model: true
       }
     });
-    res.json(agent);
+    res.json({
+      ...agent,
+      workflow: agent.workflow ? JSON.parse(agent.workflow) : null
+    });
   } catch (error) {
     console.error('Error updating agent:', error);
     res.status(500).json({ error: 'Failed to update agent' });

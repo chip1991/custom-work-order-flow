@@ -97,6 +97,7 @@ model Agent {
   description  String?
   systemPrompt String?
   modelId      String
+  workflow     String? // Store as JSON string since SQLite doesn't support Json type natively, or Json if Prisma supports it.
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

@@ -1,8 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Save, ArrowLeft, AlertCircle } from 'lucide-react';
 import { getAgent, createAgent, updateAgent } from '@/api/agents';
 import { Model, fetchModels } from '@/lib/api';
+import { ReactFlowProvider, Node, Edge } from '@xyflow/react';
+
+import Sidebar from './components/Sidebar';
+import Canvas from './components/Canvas';
+import PropertiesPanel from './components/PropertiesPanel';
 
 export default function AgentEditor() {
   const { id } = useParams<{ id: string }>();
@@ -15,12 +20,16 @@ export default function AgentEditor() {
 
   const [models, setModels] = useState<Model[]>([]);
 
-  const [formData, setFormData] = useState({
+  const [agentData, setAgentData] = useState({
     name: '',
     description: '',
     systemPrompt: '',
     modelId: '',
   });
+
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
   useEffect(() => {
     loadModels();
@@ -31,7 +40,7 @@ export default function AgentEditor() {
       const data = await fetchModels();
       setModels(data);
       if (!isEditing && data.length > 0) {
-        setFormData((prev) => ({ ...prev, modelId: data[0].id }));
+        setAgentData((prev) => ({ ...prev, modelId: data[0].id }));
       }
     } catch (err) {
       console.error("Failed to load models:", err);
@@ -42,12 +51,22 @@ export default function AgentEditor() {
     if (isEditing && id) {
       getAgent(id)
         .then((data) => {
-          setFormData({
+          setAgentData({
             name: data.name,
             description: data.description || '',
             systemPrompt: data.systemPrompt || '',
             modelId: data.modelId,
           });
+          
+          if (data.workflow) {
+            try {
+              const workflow = typeof data.workflow === 'string' ? JSON.parse(data.workflow) : data.workflow;
+              if (workflow.nodes) setNodes(workflow.nodes);
+              if (workflow.edges) setEdges(workflow.edges);
+            } catch (e) {
+              console.error("Failed to parse workflow:", e);
+            }
+          }
         })
         .catch((err) => {
           console.error(err);
@@ -58,24 +77,29 @@ export default function AgentEditor() {
   }, [id, isEditing]);
 
   const handleSave = async () => {
-    if (!formData.name.trim()) {
+    if (!agentData.name.trim()) {
       setError('代理名称不能为空');
       return;
     }
 
-    if (!formData.modelId) {
-      setError('请选择一个模型');
+    if (!agentData.modelId) {
+      setError('请选择一个默认模型');
       return;
     }
 
     setError(null);
     setSaving(true);
 
+    const payload = {
+      ...agentData,
+      workflow: { nodes, edges }
+    };
+
     try {
       if (isEditing && id) {
-        await updateAgent(id, formData);
+        await updateAgent(id, payload);
       } else {
-        await createAgent(formData);
+        await createAgent(payload);
       }
       navigate('/agents');
     } catch (err: any) {
@@ -86,112 +110,91 @@ export default function AgentEditor() {
     }
   };
 
+  const updateNodeData = useCallback((nodeId: string, newData: any) => {
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id === nodeId) {
+          const updatedNode = { ...n, data: { ...n.data, ...newData } };
+          if (selectedNode?.id === nodeId) {
+             setSelectedNode(updatedNode);
+          }
+          return updatedNode;
+        }
+        return n;
+      })
+    );
+  }, [selectedNode]);
+
   if (loading) {
-    return <div className="p-8 text-center text-gray-500">加载中...</div>;
+    return <div className="p-8 text-center text-gray-500 flex items-center justify-center h-full">加载中...</div>;
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12">
-      <div className="flex items-center space-x-4 mb-8">
-        <button
-          onClick={() => navigate('/agents')}
-          className="p-2 text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isEditing ? '编辑代理' : '新增代理'}
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">配置和管理自定义大语言模型代理</p>
-        </div>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 p-4 rounded-md flex items-center text-red-700 border border-red-200">
-          <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
-          {error}
-        </div>
-      )}
-
-      <div className="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
-        <div className="p-6 space-y-6">
+    <div className="flex flex-col h-full bg-white overflow-hidden">
+      {/* Header */}
+      <header className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-4 flex items-center justify-between z-10">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => navigate('/agents')}
+            className="p-2 text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              代理名称 <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="例如：代码助手"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              描述
-            </label>
-            <input
-              type="text"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="代理功能的简短描述"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              绑定模型 <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={formData.modelId}
-              onChange={(e) => setFormData({ ...formData, modelId: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-              required
-            >
-              <option value="" disabled>请选择模型</option>
-              {models.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.name} ({model.provider})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              系统提示词 (System Prompt)
-            </label>
-            <textarea
-              value={formData.systemPrompt}
-              onChange={(e) => setFormData({ ...formData, systemPrompt: e.target.value })}
-              rows={6}
-              placeholder="You are a helpful assistant..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 font-mono text-sm resize-y"
-            />
+            <h1 className="text-xl font-bold text-gray-900 leading-tight">
+              {isEditing ? '编辑 Agent 流程' : '新增 Agent 流程'}
+            </h1>
+            <p className="text-sm text-gray-500">{agentData.name || '未命名 Agent'}</p>
           </div>
         </div>
-      </div>
 
-      <div className="pt-6 border-t border-gray-200 flex justify-end space-x-4">
-        <button
-          onClick={() => navigate('/agents')}
-          className="px-6 py-2.5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          取消
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="inline-flex items-center px-6 py-2.5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Save className="w-4 h-4 mr-2" />
-          {saving ? '保存中...' : '保存代理'}
-        </button>
+        <div className="flex items-center space-x-4">
+          {error && (
+            <div className="text-sm text-red-600 flex items-center">
+              <AlertCircle className="w-4 h-4 mr-1" />
+              {error}
+            </div>
+          )}
+          <button
+            onClick={() => navigate('/agents')}
+            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            取消
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? '保存中...' : '保存 Agent'}
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        <Sidebar />
+        
+        <main className="flex-1 relative">
+          <ReactFlowProvider>
+            <Canvas 
+              nodes={nodes} 
+              edges={edges} 
+              setNodes={setNodes} 
+              setEdges={setEdges} 
+              onNodeSelect={setSelectedNode} 
+            />
+          </ReactFlowProvider>
+        </main>
+
+        <PropertiesPanel
+          selectedNode={selectedNode}
+          onUpdateNodeData={updateNodeData}
+          agentData={agentData}
+          onUpdateAgentData={setAgentData}
+          models={models}
+        />
       </div>
     </div>
   );

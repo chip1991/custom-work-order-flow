@@ -8,6 +8,7 @@ export interface Agent {
   modelId: string;
   createdAt: string;
   updatedAt: string;
+  workflow?: any;
   model?: Model;
 }
 

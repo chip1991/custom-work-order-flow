@@ -16,6 +16,9 @@ export default function ModelModal({ isOpen, onClose, onSuccess, editingModel }:
     baseUrl: "",
     apiKey: "",
     enabled: true,
+    temperature: 0.7,
+    topP: 1.0,
+    maxTokens: 2048,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -28,6 +31,9 @@ export default function ModelModal({ isOpen, onClose, onSuccess, editingModel }:
         baseUrl: editingModel.baseUrl || "",
         apiKey: editingModel.apiKey || "",
         enabled: editingModel.enabled,
+        temperature: editingModel.temperature ?? 0.7,
+        topP: editingModel.topP ?? 1.0,
+        maxTokens: editingModel.maxTokens ?? 2048,
       });
     } else {
       setFormData({
@@ -36,6 +42,9 @@ export default function ModelModal({ isOpen, onClose, onSuccess, editingModel }:
         baseUrl: "",
         apiKey: "",
         enabled: true,
+        temperature: 0.7,
+        topP: 1.0,
+        maxTokens: 2048,
       });
     }
     setError("");
@@ -142,6 +151,45 @@ export default function ModelModal({ isOpen, onClose, onSuccess, editingModel }:
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="输入 API 密钥"
             />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Temperature
+              </label>
+              <input
+                type="number"
+                step="0.1" min="0" max="2"
+                value={formData.temperature}
+                onChange={(e) => setFormData({ ...formData, temperature: parseFloat(e.target.value) })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Top P
+              </label>
+              <input
+                type="number"
+                step="0.1" min="0" max="1"
+                value={formData.topP}
+                onChange={(e) => setFormData({ ...formData, topP: parseFloat(e.target.value) })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Max Tokens
+              </label>
+              <input
+                type="number"
+                step="1" min="1"
+                value={formData.maxTokens}
+                onChange={(e) => setFormData({ ...formData, maxTokens: parseInt(e.target.value, 10) })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
 
           <div className="flex items-center mt-4">

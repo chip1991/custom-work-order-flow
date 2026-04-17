@@ -173,6 +173,11 @@ export default function Models() {
                   <div className="text-xs text-gray-500 mb-3 truncate">
                     URL: {model.baseUrl || "默认接口"}
                   </div>
+                  <div className="text-xs text-gray-500 mb-3 truncate space-x-2">
+                    <span>Temp: {model.temperature ?? 0.7}</span>
+                    <span>| Top P: {model.topP ?? 1.0}</span>
+                    <span>| Tokens: {model.maxTokens ?? 2048}</span>
+                  </div>
                   <div className="flex items-center justify-end space-x-4 border-t border-gray-100 pt-3 mt-3">
                     <button
                       onClick={() => {
@@ -208,6 +213,9 @@ export default function Models() {
                   Base URL
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  参数配置
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   状态
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -218,7 +226,7 @@ export default function Models() {
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center justify-center">
                       <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
                       <p>加载中...</p>
@@ -227,7 +235,7 @@ export default function Models() {
                 </tr>
               ) : currentModels.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center justify-center">
                       <Cpu className="w-12 h-12 text-gray-300 mb-4" />
                       <p className="text-lg font-medium text-gray-900">未找到模型</p>
@@ -253,6 +261,13 @@ export default function Models() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {model.baseUrl || <span className="text-gray-400 italic">默认接口</span>}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex flex-col text-xs text-gray-500 gap-0.5">
+                        <span>Temp: {model.temperature ?? 0.7}</span>
+                        <span>Top P: {model.topP ?? 1.0}</span>
+                        <span>Tokens: {model.maxTokens ?? 2048}</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button

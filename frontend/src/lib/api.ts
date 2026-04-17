@@ -20,6 +20,9 @@ export interface Model {
   baseUrl: string | null;
   apiKey: string | null;
   enabled: boolean;
+  temperature?: number | null;
+  topP?: number | null;
+  maxTokens?: number | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -208,6 +208,9 @@ class EvaluationEngine {
       model: model.name,
       messages,
       stream: true,
+      ...(model.temperature !== null && { temperature: model.temperature }),
+      ...(model.topP !== null && { top_p: model.topP }),
+      ...(model.maxTokens !== null && { max_tokens: model.maxTokens }),
     });
 
     for await (const chunk of stream) {

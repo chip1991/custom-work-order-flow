@@ -20,14 +20,17 @@ model User {
 }
 
 model Model {
-  id        String   @id @default(uuid())
-  name      String
-  provider  String
-  baseUrl   String?
-  apiKey    String?
-  enabled   Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  provider    String
+  baseUrl     String?
+  apiKey      String?
+  temperature Float?   @default(0.7)
+  topP        Float?   @default(1.0)
+  maxTokens   Int?     @default(2048)
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   tasks       Task[]       @relation("TaskModels")
   taskResults TaskResult[]

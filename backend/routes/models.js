@@ -37,7 +37,7 @@ router.get('/:id', async (req, res) => {
 // Create a new model
 router.post('/', async (req, res) => {
   try {
-    const { name, provider, baseUrl, apiKey, enabled } = req.body;
+    const { name, provider, baseUrl, apiKey, enabled, temperature, topP, maxTokens } = req.body;
     
     // Validate required fields
     if (!name || !provider) {
@@ -50,6 +50,9 @@ router.post('/', async (req, res) => {
         provider,
         baseUrl,
         apiKey,
+        temperature,
+        topP,
+        maxTokens,
         enabled: enabled !== undefined ? enabled : true
       }
     });
@@ -64,7 +67,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, provider, baseUrl, apiKey, enabled } = req.body;
+    const { name, provider, baseUrl, apiKey, enabled, temperature, topP, maxTokens } = req.body;
     
     // Check if model exists
     const existingModel = await prisma.model.findUnique({ where: { id } });
@@ -79,6 +82,9 @@ router.put('/:id', async (req, res) => {
         provider: provider !== undefined ? provider : existingModel.provider,
         baseUrl: baseUrl !== undefined ? baseUrl : existingModel.baseUrl,
         apiKey: apiKey !== undefined ? apiKey : existingModel.apiKey,
+        temperature: temperature !== undefined ? temperature : existingModel.temperature,
+        topP: topP !== undefined ? topP : existingModel.topP,
+        maxTokens: maxTokens !== undefined ? maxTokens : existingModel.maxTokens,
         enabled: enabled !== undefined ? enabled : existingModel.enabled
       }
     });

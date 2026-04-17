@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
-import { Cpu, BookOpen, Activity, LogOut, Menu, X } from "lucide-react";
+import { Cpu, BookOpen, Activity, LogOut, Menu, X, Bot } from "lucide-react";
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -19,6 +19,7 @@ export default function Layout() {
 
   const navItems = [
     { name: "模型中心", path: "/models", icon: <Cpu className="w-5 h-5 mr-3" /> },
+    { name: "代理管理", path: "/agents", icon: <Bot className="w-5 h-5 mr-3" /> },
     { name: "题库中心", path: "/datasets", icon: <BookOpen className="w-5 h-5 mr-3" /> },
     { name: "测评中心", path: "/evaluations", icon: <Activity className="w-5 h-5 mr-3" /> },
   ];

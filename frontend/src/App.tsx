@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Home from "@/pages/Home";
 import Layout from "@/components/Layout";
 import Models from "@/pages/Models";
+import Agents from "@/pages/Agents";
 
 import Datasets from "@/pages/Datasets";
 import DatasetEditor from "@/pages/Datasets/Editor";

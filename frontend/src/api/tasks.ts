@@ -54,3 +54,10 @@ export const createTask = async (data: CreateTaskDto): Promise<Task> => {
   if (!res.ok) throw new Error('Failed to create task');
   return res.json();
 };
+
+export const deleteTask = async (id: string): Promise<void> => {
+  const res = await fetch(`/api/tasks/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete task');
+};

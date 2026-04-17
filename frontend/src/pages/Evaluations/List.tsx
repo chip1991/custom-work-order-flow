@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Plus, List as ListIcon, Search, Eye } from "lucide-react";
+import { Plus, List as ListIcon, Search, Eye, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getTasks, Task } from "@/api/tasks";
+import { getTasks, deleteTask, Task } from "@/api/tasks";
 
 export default function EvaluationsList() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -31,6 +31,17 @@ export default function EvaluationsList() {
     }, 3000);
     return () => clearInterval(interval);
   }, [tasks]);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("确定要删除此测评任务吗？相关结果也会被一并删除。")) return;
+    try {
+      await deleteTask(id);
+      setTasks(tasks.filter(t => t.id !== id));
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+      alert("删除失败，请重试");
+    }
+  };
 
   const filteredTasks = tasks.filter(task =>
     task.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -115,13 +126,22 @@ export default function EvaluationsList() {
                   </div>
                   <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
                     <span>{new Date(task.createdAt).toLocaleString()}</span>
-                    <button
-                      onClick={() => navigate(`/evaluations/${task.id}`)}
-                      className="text-blue-600 hover:text-blue-900 transition-colors inline-flex items-center font-medium"
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      详情
-                    </button>
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => handleDelete(task.id)}
+                        className="text-red-600 hover:text-red-900 transition-colors inline-flex items-center font-medium"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        删除
+                      </button>
+                      <button
+                        onClick={() => navigate(`/evaluations/${task.id}`)}
+                        className="text-blue-600 hover:text-blue-900 transition-colors inline-flex items-center font-medium"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        详情
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -191,14 +211,24 @@ export default function EvaluationsList() {
                       {new Date(task.createdAt).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => navigate(`/evaluations/${task.id}`)}
-                        className="text-blue-600 hover:text-blue-900 transition-colors inline-flex items-center"
-                        title="查看详情"
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        详情
-                      </button>
+                      <div className="flex justify-end space-x-4">
+                        <button
+                          onClick={() => navigate(`/evaluations/${task.id}`)}
+                          className="text-blue-600 hover:text-blue-900 transition-colors inline-flex items-center"
+                          title="查看详情"
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          详情
+                        </button>
+                        <button
+                          onClick={() => handleDelete(task.id)}
+                          className="text-red-600 hover:text-red-900 transition-colors inline-flex items-center"
+                          title="删除任务"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          删除
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

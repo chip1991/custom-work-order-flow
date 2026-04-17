@@ -113,4 +113,18 @@ router.get('/:id/stream', (req, res) => {
   });
 });
 
+// Delete a task
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.task.delete({
+      where: { id }
+    });
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Delete task error:', error);
+    res.status(500).json({ error: 'Failed to delete task' });
+  }
+});
+
 module.exports = router;

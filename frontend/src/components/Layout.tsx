@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
-import { Cpu, BookOpen, Activity, LogOut, Menu, X, Bot } from "lucide-react";
+import { Cpu, BookOpen, Activity, LogOut, Menu, X, Bot, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Layout() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   if (!token) {
     return <Navigate to="/login" replace />;
@@ -18,10 +19,10 @@ export default function Layout() {
   };
 
   const navItems = [
-    { name: "模型中心", path: "/models", icon: <Cpu className="w-5 h-5 mr-3" /> },
-    { name: "智能体中心", path: "/agents", icon: <Bot className="w-5 h-5 mr-3" /> },
-    { name: "题库中心", path: "/datasets", icon: <BookOpen className="w-5 h-5 mr-3" /> },
-    { name: "测评中心", path: "/evaluations", icon: <Activity className="w-5 h-5 mr-3" /> },
+    { name: "模型中心", path: "/models", icon: <Cpu className="w-5 h-5 shrink-0" /> },
+    { name: "智能体中心", path: "/agents", icon: <Bot className="w-5 h-5 shrink-0" /> },
+    { name: "题库中心", path: "/datasets", icon: <BookOpen className="w-5 h-5 shrink-0" /> },
+    { name: "测评中心", path: "/evaluations", icon: <Activity className="w-5 h-5 shrink-0" /> },
   ];
 
   return (
@@ -49,17 +50,26 @@ export default function Layout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
+        className={`fixed md:static inset-y-0 left-0 z-50 bg-white border-r border-gray-200 flex flex-col transform transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0"
+        } ${isCollapsed ? "md:w-16" : "md:w-64"}`}
       >
-        <div className="h-14 md:h-16 flex items-center justify-between px-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-800 tracking-tight hidden md:block">
-            LLM Eval Platform
+        <div className={`h-14 md:h-16 flex items-center px-6 border-b border-gray-200 relative ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+          <h1 className={`text-xl font-bold text-gray-800 tracking-tight hidden md:block whitespace-nowrap transition-opacity duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
+            LLM Eval
           </h1>
           <h1 className="text-lg font-bold text-gray-800 tracking-tight md:hidden">
             菜单
           </h1>
+          
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-white border border-gray-200 rounded-full items-center justify-center text-gray-500 hover:text-blue-600 hover:bg-blue-50 shadow-sm z-50 transition-colors"
+            title={isCollapsed ? "展开侧边栏" : "收起侧边栏"}
+          >
+            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
+
           <button
             onClick={() => setIsSidebarOpen(false)}
             className="md:hidden p-2 -mr-2 text-gray-600 hover:bg-gray-100 rounded-md"
@@ -68,14 +78,17 @@ export default function Layout() {
           </button>
         </div>
         
-        <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto overflow-x-hidden">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
               onClick={() => setIsSidebarOpen(false)}
+              title={isCollapsed ? item.name : undefined}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2.5 rounded-md transition-colors duration-200 ${
+                `flex items-center py-2.5 rounded-md transition-colors duration-200 ${
+                  isCollapsed ? "justify-center px-0" : "px-3"
+                } ${
                   isActive
                     ? "bg-blue-50 text-blue-700 font-medium"
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
@@ -83,18 +96,29 @@ export default function Layout() {
               }
             >
               {item.icon}
-              {item.name}
+              <span className={`whitespace-nowrap transition-all duration-300 ${
+                isCollapsed ? "opacity-0 w-0 ml-0 overflow-hidden" : "opacity-100 ml-3"
+              }`}>
+                {item.name}
+              </span>
             </NavLink>
           ))}
         </nav>
         
-        <div className="p-4 border-t border-gray-200">
+        <div className={`p-4 border-t border-gray-200 flex ${isCollapsed ? 'justify-center px-2' : ''}`}>
           <button
             onClick={handleLogout}
-            className="flex items-center w-full px-3 py-2.5 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors"
+            title={isCollapsed ? "退出登录" : undefined}
+            className={`flex items-center py-2.5 text-gray-600 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors ${
+              isCollapsed ? "justify-center px-0 w-full" : "px-3 w-full"
+            }`}
           >
-            <LogOut className="w-5 h-5 mr-3" />
-            退出登录
+            <LogOut className="w-5 h-5 shrink-0" />
+            <span className={`whitespace-nowrap transition-all duration-300 ${
+              isCollapsed ? "opacity-0 w-0 ml-0 overflow-hidden" : "opacity-100 ml-3"
+            }`}>
+              退出登录
+            </span>
           </button>
         </div>
       </aside>

@@ -103,6 +103,7 @@ router.post('/chat/completions', authMiddleware, async (req, res) => {
         model: dbModel.name,
         messages: newMessages,
         stream: true,
+        stream_options: { include_usage: true },
         temperature: temperature !== undefined ? temperature : dbModel.temperature,
         top_p: top_p !== undefined ? top_p : dbModel.topP,
         max_tokens: max_tokens !== undefined ? max_tokens : dbModel.maxTokens,
@@ -112,11 +113,22 @@ router.post('/chat/completions', authMiddleware, async (req, res) => {
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
 
+      let totalTokens = 0;
       for await (const chunk of responseStream) {
+        if (chunk.usage && chunk.usage.total_tokens) {
+          totalTokens = chunk.usage.total_tokens;
+        }
         res.write(`data: ${JSON.stringify(chunk)}\n\n`);
       }
       res.write('data: [DONE]\n\n');
       res.end();
+
+      if (totalTokens > 0) {
+        prisma.apiKey.update({
+          where: { id: req.apiKey.id },
+          data: { totalTokensUsed: { increment: totalTokens } }
+        }).catch(err => console.error('Failed to update token usage:', err));
+      }
     } else {
       const response = await openai.chat.completions.create({
         model: dbModel.name,
@@ -126,6 +138,13 @@ router.post('/chat/completions', authMiddleware, async (req, res) => {
         top_p: top_p !== undefined ? top_p : dbModel.topP,
         max_tokens: max_tokens !== undefined ? max_tokens : dbModel.maxTokens,
       });
+
+      if (response.usage && response.usage.total_tokens) {
+        prisma.apiKey.update({
+          where: { id: req.apiKey.id },
+          data: { totalTokensUsed: { increment: response.usage.total_tokens } }
+        }).catch(err => console.error('Failed to update token usage:', err));
+      }
 
       return res.json(response);
     }

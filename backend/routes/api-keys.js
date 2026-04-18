@@ -9,7 +9,15 @@ const prisma = new PrismaClient();
 router.get('/', async (req, res) => {
   try {
     const apiKeys = await prisma.apiKey.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        key: true,
+        createdAt: true,
+        updatedAt: true,
+        totalTokensUsed: true
+      }
     });
     res.json(apiKeys);
   } catch (error) {

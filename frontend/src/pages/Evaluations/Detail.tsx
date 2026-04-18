@@ -21,6 +21,7 @@ export interface Message {
   content: string;
   timeTaken?: number;
   firstTokenTime?: number;
+  tokensUsed?: number;
 }
 
 interface TaskResultState extends TaskResult {
@@ -72,7 +73,7 @@ const MessageBubble = ({ msg, result, isLast }: { msg: Message, result: any, isL
       </div>
 
       {/* Turn Metrics & Actions */}
-      {((msg.role === 'assistant' && (msg.timeTaken || msg.firstTokenTime)) || isTruncated || isExpanded) && (
+      {((msg.role === 'assistant' && (msg.timeTaken || msg.firstTokenTime || msg.tokensUsed !== undefined)) || isTruncated || isExpanded) && (
         <div className={`flex items-center justify-between w-full mt-1.5 px-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
           <div className="flex items-center gap-3 text-[11px] text-gray-400">
             {msg.role === 'assistant' && msg.firstTokenTime && (
@@ -85,6 +86,12 @@ const MessageBubble = ({ msg, result, isLast }: { msg: Message, result: any, isL
               <span className="flex items-center gap-1" title="总耗时">
                 <Clock className="w-3 h-3 text-blue-400" />
                 {msg.timeTaken}ms
+              </span>
+            )}
+            {msg.role === 'assistant' && msg.tokensUsed !== undefined && (
+              <span className="flex items-center gap-1" title="Tokens 消耗">
+                <Cpu className="w-3 h-3 text-purple-400" />
+                {msg.tokensUsed}
               </span>
             )}
           </div>
@@ -253,7 +260,8 @@ export default function EvaluationsDetail() {
             msgs[msgs.length - 1] = { 
               ...msgs[msgs.length - 1], 
               timeTaken: data.timeTaken,
-              firstTokenTime: data.firstTokenTime
+              firstTokenTime: data.firstTokenTime,
+              tokensUsed: data.tokensUsed
             };
           }
           return {
@@ -275,7 +283,8 @@ export default function EvaluationsDetail() {
               ...result,
               status: 'success',
               timeTaken: data.timeTaken,
-              firstTokenTime: data.firstTokenTime
+              firstTokenTime: data.firstTokenTime,
+              tokensUsed: data.tokensUsed
             }
           };
         });

@@ -1,0 +1,5 @@
+- [x] `ApiKey` 数据模型中成功添加了 `totalTokensUsed` 字段。
+- [x] 内部测评引擎 (`engine.js`) 成功通过 `include_usage: true` 获取了 Token，并写入到了 `TaskResult.tokensUsed`。
+- [x] 第三方开放网关 (`v1-chat.js`) 能够从流或非流返回中提取 Token，并累加到 `ApiKey.totalTokensUsed`。
+- [x] 前端“API 密钥”管理列表中能看到新列“已用 Tokens”。
+- [x] 前端“测评详情”页面能在对话回合旁显示“消耗了 x Tokens”。

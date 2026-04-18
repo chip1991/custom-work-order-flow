@@ -108,6 +108,7 @@ export default function ApiKeys() {
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">名称</th>
                   <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">密钥</th>
+                  <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">总 Token 消耗</th>
                   <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
                   <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">操作</th>
                 </tr>
@@ -131,6 +132,9 @@ export default function ApiKeys() {
                           {copiedId === apiKey.id ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                         </button>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{apiKey.totalTokensUsed?.toLocaleString() || 0}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(apiKey.createdAt).toLocaleDateString()}

@@ -82,6 +82,7 @@ class EvaluationEngine {
           let fullHistory = [];
           let totalTimeTaken = 0;
           let firstTokenTime = null;
+          let totalTokensUsed = 0;
           let hasError = false;
           let errorMessage = '';
 
@@ -113,10 +114,12 @@ class EvaluationEngine {
                   modelId: model.id,
                   questionId: question.id,
                   timeTaken: res.timeTaken,
-                  firstTokenTime: res.firstTokenTime
+                  firstTokenTime: res.firstTokenTime,
+                  tokensUsed: res.tokensUsed
                 });
                 
                 totalTimeTaken += res.timeTaken;
+                if (res.tokensUsed) totalTokensUsed += res.tokensUsed;
                 if (!firstTokenTime) firstTokenTime = res.firstTokenTime;
               } catch (error) {
                 console.error(`Evaluation failed for model ${model.name}, question ${question.name}:`, error);
@@ -133,7 +136,8 @@ class EvaluationEngine {
               data: {
                 status: 'error',
                 error: errorMessage,
-                response: JSON.stringify(fullHistory)
+                response: JSON.stringify(fullHistory),
+                tokensUsed: totalTokensUsed > 0 ? totalTokensUsed : null
               }
             });
             this.broadcast(taskId, {
@@ -150,7 +154,8 @@ class EvaluationEngine {
                 status: 'success',
                 response: JSON.stringify(fullHistory),
                 timeTaken: totalTimeTaken,
-                firstTokenTime
+                firstTokenTime,
+                tokensUsed: totalTokensUsed > 0 ? totalTokensUsed : null
               }
             });
             this.broadcast(taskId, {
@@ -159,7 +164,8 @@ class EvaluationEngine {
               modelId: model.id,
               questionId: question.id,
               timeTaken: totalTimeTaken,
-              firstTokenTime
+              firstTokenTime,
+              tokensUsed: totalTokensUsed > 0 ? totalTokensUsed : null
             });
           }
           
@@ -194,6 +200,7 @@ class EvaluationEngine {
     const startTime = Date.now();
     let firstTokenTime = null;
     let fullResponse = '';
+    let tokensUsed = null;
     
     const config = {
       apiKey: model.apiKey || 'dummy-key',
@@ -208,6 +215,7 @@ class EvaluationEngine {
       model: model.name,
       messages,
       stream: true,
+      stream_options: { include_usage: true },
       ...(model.temperature !== null && { temperature: model.temperature }),
       ...(model.topP !== null && { top_p: model.topP }),
       ...(model.maxTokens !== null && { max_tokens: model.maxTokens }),
@@ -218,7 +226,11 @@ class EvaluationEngine {
         firstTokenTime = Date.now() - startTime;
       }
       
-      const content = chunk.choices[0]?.delta?.content || '';
+      if (chunk.usage && chunk.usage.total_tokens) {
+        tokensUsed = chunk.usage.total_tokens;
+      }
+      
+      const content = chunk.choices?.[0]?.delta?.content || '';
       if (content) {
         fullResponse += content;
         this.broadcast(taskId, {
@@ -232,7 +244,7 @@ class EvaluationEngine {
     }
 
     const timeTaken = Date.now() - startTime;
-    return { fullResponse, timeTaken, firstTokenTime };
+    return { fullResponse, timeTaken, firstTokenTime, tokensUsed };
   }
 }
 

@@ -4,6 +4,7 @@ export interface ApiKey {
   id: string;
   name: string;
   key: string;
+  totalTokensUsed?: number;
   createdAt: string;
   updatedAt: string;
 }

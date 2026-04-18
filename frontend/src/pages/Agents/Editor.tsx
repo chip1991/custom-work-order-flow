@@ -257,6 +257,8 @@ export default function AgentEditor() {
                   selectedNode={selectedNode}
                   onUpdateNodeData={updateNodeData}
                   models={models}
+                  nodes={nodes}
+                  edges={edges}
                 />
               </div>
             ) : (

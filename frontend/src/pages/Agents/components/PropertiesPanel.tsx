@@ -1,17 +1,102 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Model } from '@/lib/api';
-import { Settings, SlidersHorizontal } from 'lucide-react';
+import { Settings, SlidersHorizontal, Plus } from 'lucide-react';
+import { Node, Edge } from '@xyflow/react';
 
 interface PropertiesPanelProps {
   selectedNode: any | null;
   onUpdateNodeData: (id: string, data: any) => void;
   models: Model[];
+  nodes: Node[];
+  edges: Edge[];
 }
+
+function getUpstreamNodes(targetNodeId: string, nodes: Node[], edges: Edge[]): Node[] {
+  const upstreamNodes = new Map<string, Node>();
+  const visited = new Set<string>();
+
+  const traverse = (nodeId: string) => {
+    if (visited.has(nodeId)) return;
+    visited.add(nodeId);
+
+    const incomingEdges = edges.filter(e => e.target === nodeId);
+    for (const edge of incomingEdges) {
+      const sourceNode = nodes.find(n => n.id === edge.source);
+      if (sourceNode) {
+        if (!upstreamNodes.has(sourceNode.id)) {
+           upstreamNodes.set(sourceNode.id, sourceNode);
+        }
+        traverse(sourceNode.id);
+      }
+    }
+  };
+
+  traverse(targetNodeId);
+  return Array.from(upstreamNodes.values());
+}
+
+const VariableSelector = ({ 
+  upstreamNodes, 
+  onSelect 
+}: { 
+  upstreamNodes: Node[], 
+  onSelect: (variable: string) => void 
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  if (upstreamNodes.length === 0) return null;
+
+  return (
+    <div className="relative inline-block text-left ml-2" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="inline-flex items-center text-xs text-indigo-600 hover:text-indigo-800"
+      >
+        <Plus className="w-3 h-3 mr-1" />
+        插入变量
+      </button>
+
+      {isOpen && (
+        <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+          <div className="py-1 max-h-60 overflow-y-auto" role="menu" aria-orientation="vertical">
+            {upstreamNodes.map((node) => (
+              <button
+                key={node.id}
+                onClick={() => {
+                  onSelect(`{{${node.id}.output}}`);
+                  setIsOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                role="menuitem"
+              >
+                {node.data?.label || node.id}.output
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function PropertiesPanel({
   selectedNode,
   onUpdateNodeData,
   models,
+  nodes,
+  edges,
 }: PropertiesPanelProps) {
 
   const renderNodeSettings = () => {
@@ -20,6 +105,13 @@ export default function PropertiesPanel({
     const data = selectedNode.data || {};
     const updateData = (newData: any) => {
       onUpdateNodeData(selectedNode.id, { ...data, ...newData });
+    };
+
+    const upstreamNodes = getUpstreamNodes(selectedNode.id, nodes, edges);
+
+    const handleInsertVariable = (field: string, variable: string) => {
+      const currentValue = data[field] || '';
+      updateData({ [field]: currentValue + (currentValue.endsWith(' ') || currentValue === '' ? '' : ' ') + variable });
     };
 
     return (
@@ -56,7 +148,13 @@ export default function PropertiesPanel({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">系统提示词</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
+                <span>系统提示词</span>
+                <VariableSelector
+                  upstreamNodes={upstreamNodes}
+                  onSelect={(v) => handleInsertVariable('systemPrompt', v)}
+                />
+              </label>
               <textarea
                 value={data.systemPrompt || ''}
                 onChange={(e) => updateData({ systemPrompt: e.target.value })}
@@ -66,7 +164,13 @@ export default function PropertiesPanel({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">用户提示词模板</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
+                <span>用户提示词模板</span>
+                <VariableSelector
+                  upstreamNodes={upstreamNodes}
+                  onSelect={(v) => handleInsertVariable('userPrompt', v)}
+                />
+              </label>
               <textarea
                 value={data.userPrompt || ''}
                 onChange={(e) => updateData({ userPrompt: e.target.value })}

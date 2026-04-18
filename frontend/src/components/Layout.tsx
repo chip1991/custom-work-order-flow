@@ -52,11 +52,11 @@ export default function Layout() {
       <aside
         className={`fixed md:static inset-y-0 left-0 z-50 bg-white border-r border-gray-200 flex flex-col transform transition-all duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0"
-        } ${isCollapsed ? "md:w-16" : "md:w-64"}`}
+        } ${isCollapsed ? "md:w-56" : "md:w-64"}`}
       >
         <div className={`h-14 md:h-16 flex items-center px-6 border-b border-gray-200 relative ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
           <h1 className={`text-xl font-bold text-gray-800 tracking-tight hidden md:block whitespace-nowrap transition-opacity duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
-            LLM Eval
+            LLM Eval Platform
           </h1>
           <h1 className="text-lg font-bold text-gray-800 tracking-tight md:hidden">
             菜单

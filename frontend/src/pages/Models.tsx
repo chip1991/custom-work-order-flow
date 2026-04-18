@@ -73,25 +73,18 @@ export default function Models() {
   return (
     <div className="h-full flex flex-col space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
-            <Cpu className="w-6 h-6 text-blue-600" />
-            模型中心
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            管理用于测评的大语言模型及其接口配置
-          </p>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => {
+              setEditingModel(null);
+              setIsModalOpen(true);
+            }}
+            className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors focus:ring-4 focus:ring-blue-100"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            新增模型
+          </button>
         </div>
-        <button
-          onClick={() => {
-            setEditingModel(null);
-            setIsModalOpen(true);
-          }}
-          className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors focus:ring-4 focus:ring-blue-100"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          新增模型
-        </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1 flex flex-col">

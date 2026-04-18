@@ -1,5 +1,6 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
+const { DagEngine } = require('../services/dag-engine');
 const router = express.Router();
 
 const prisma = new PrismaClient();
@@ -144,6 +145,100 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting agent:', error);
     res.status(500).json({ error: 'Failed to delete agent' });
+  }
+});
+
+// Execute an agent's workflow
+router.post('/execute', async (req, res) => {
+  try {
+    const { input, stream, workflow } = req.body;
+    
+    if (!workflow) {
+      return res.status(400).json({ error: 'Workflow is required' });
+    }
+
+    const nodes = workflow.nodes || [];
+    const edges = workflow.edges || [];
+
+    const engine = new DagEngine();
+    const initialContext = { input };
+
+    if (stream) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+
+      const onEvent = (event) => {
+        res.write(`data: ${JSON.stringify(event)}\n\n`);
+      };
+
+      try {
+        await engine.run(nodes, edges, initialContext, onEvent);
+      } catch (error) {
+        res.write(`data: ${JSON.stringify({ type: 'workflow_error', error: error.message })}\n\n`);
+      }
+      res.write('data: [DONE]\n\n');
+      res.end();
+    } else {
+      const results = await engine.run(nodes, edges, initialContext);
+      res.json({ results });
+    }
+  } catch (error) {
+    console.error('Error executing agent workflow:', error);
+    res.status(500).json({ error: 'Failed to execute workflow' });
+  }
+});
+
+// Execute an agent's workflow by ID
+router.post('/:id/execute', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { input, stream, workflow: overrideWorkflow } = req.body;
+    
+    let workflow = overrideWorkflow;
+
+    if (!workflow) {
+      const agent = await prisma.agent.findUnique({ where: { id } });
+      if (!agent) {
+        return res.status(404).json({ error: 'Agent not found' });
+      }
+
+      if (!agent.workflow) {
+        return res.status(400).json({ error: 'Agent has no workflow defined' });
+      }
+
+      workflow = JSON.parse(agent.workflow);
+    }
+
+    const nodes = workflow.nodes || [];
+    const edges = workflow.edges || [];
+
+    const engine = new DagEngine();
+    const initialContext = { input };
+
+    if (stream) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+
+      const onEvent = (event) => {
+        res.write(`data: ${JSON.stringify(event)}\n\n`);
+      };
+
+      try {
+        await engine.run(nodes, edges, initialContext, onEvent);
+      } catch (error) {
+        res.write(`data: ${JSON.stringify({ type: 'workflow_error', error: error.message })}\n\n`);
+      }
+      res.write('data: [DONE]\n\n');
+      res.end();
+    } else {
+      const results = await engine.run(nodes, edges, initialContext);
+      res.json({ results });
+    }
+  } catch (error) {
+    console.error('Error executing agent workflow:', error);
+    res.status(500).json({ error: 'Failed to execute workflow' });
   }
 });
 

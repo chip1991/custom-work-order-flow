@@ -25,13 +25,26 @@ interface CanvasProps {
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
   onNodeSelect: (node: Node | null) => void;
+  activeNodeId?: string | null;
 }
 
 const getId = () => `node_${Math.random().toString(36).substr(2, 9)}`;
 
-export default function Canvas({ nodes, edges, setNodes, setEdges, onNodeSelect }: CanvasProps) {
+export default function Canvas({ nodes, edges, setNodes, setEdges, onNodeSelect, activeNodeId }: CanvasProps) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
+
+  // Highlight active node
+  const displayNodes = React.useMemo(() => {
+    return nodes.map((node) => ({
+      ...node,
+      style: {
+        ...node.style,
+        boxShadow: activeNodeId === node.id ? '0 0 0 3px rgba(79, 70, 229, 0.5)' : node.style?.boxShadow,
+        transition: 'box-shadow 0.3s ease',
+      }
+    }));
+  }, [nodes, activeNodeId]);
 
   // Handle selection changes
   const onSelectionChange = useCallback(({ nodes }: { nodes: Node[] }) => {
@@ -91,7 +104,7 @@ export default function Canvas({ nodes, edges, setNodes, setEdges, onNodeSelect 
   return (
     <div className="flex-1 h-full w-full bg-gray-50 relative" ref={reactFlowWrapper}>
       <ReactFlow
-        nodes={nodes}
+        nodes={displayNodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}

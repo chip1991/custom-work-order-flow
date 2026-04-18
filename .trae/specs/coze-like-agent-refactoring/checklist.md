@@ -1,0 +1,6 @@
+- [x] Editor UI matches the three-column layout with a Playground drawer.
+- [x] Sidebar categorizes and allows drag-and-drop of new node types (Knowledge, Tool, Condition).
+- [x] Backend successfully parses the React Flow JSON into an executable DAG.
+- [x] Backend correctly substitutes variables across nodes during execution.
+- [x] Playground can send messages, receive streamed responses, and display execution traces.
+- [x] Active nodes are highlighted on the canvas during Playground execution.

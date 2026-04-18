@@ -22,6 +22,7 @@ app.use('/api/agents', require('./routes/agents'));
 app.use('/api/questions', require('./routes/questions'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/api-keys', require('./routes/api-keys'));
+app.use('/api/work-orders', require('./routes/work-orders'));
 
 // v1 API (OpenAI compatible)
 app.use('/api/v1', require('./routes/v1-chat'));

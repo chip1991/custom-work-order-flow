@@ -47,7 +47,7 @@ const VariableSelector = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as globalThis.Node)) {
         setIsOpen(false);
       }
     };
@@ -81,7 +81,7 @@ const VariableSelector = ({
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 role="menuitem"
               >
-                {node.data?.label || node.id}.output
+                {String(node.data?.label || node.id)}.output
               </button>
             ))}
           </div>

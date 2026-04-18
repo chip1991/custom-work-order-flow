@@ -1,0 +1,9 @@
+- [x] Database schema is updated with `WorkOrderFlow` model and migrated successfully.
+- [x] Backend CRUD API endpoints for work order flows are implemented and tested.
+- [x] Frontend route `/work-order-flows` displays a list of existing work order flows.
+- [x] Frontend allows creating and deleting work order flows from the list page.
+- [x] Frontend route `/work-order-flows/:id` renders a node-based workflow editor using `@xyflow/react`.
+- [x] Workflow editor correctly reuses or adapts the UI style of Agent Editor nodes.
+- [x] Workflow editor supports adding, connecting, and removing work order specific nodes (e.g., Submit, Approve, Process).
+- [x] Workflow editor right panel allows configuring custom form fields (type, name, options) for the flow or specific nodes.
+- [x] Saving the workflow successfully persists both `workflowData` (nodes/edges) and `formSchema` (custom fields) to the backend.

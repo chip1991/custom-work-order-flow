@@ -14,6 +14,8 @@ import EvaluationsDetail from "@/pages/Evaluations/Detail";
 
 import DocumentPage from "@/pages/Document";
 import ApiKeys from "@/pages/ApiKeys";
+import WorkOrders from "@/pages/WorkOrders";
+import WorkOrderFlowEditor from "@/pages/WorkOrders/WorkOrderFlowEditor";
 
 // 简单的鉴权组件，用于保护全屏路由
 function AuthGuard() {
@@ -37,6 +39,9 @@ export default function App() {
         <Route element={<AuthGuard />}>
           <Route path="/agents/new" element={<AgentEditor />} />
           <Route path="/agents/:id/edit" element={<AgentEditor />} />
+          
+          <Route path="/work-orders/new" element={<WorkOrderFlowEditor />} />
+          <Route path="/work-orders/:id" element={<WorkOrderFlowEditor />} />
         </Route>
         
         {/* Main Application Layout (带侧边栏) */}
@@ -53,6 +58,8 @@ export default function App() {
           <Route path="evaluations/new" element={<EvaluationsCreate />} />
           <Route path="evaluations/:id" element={<EvaluationsDetail />} />
           
+          <Route path="work-orders" element={<WorkOrders />} />
+
           <Route path="api-keys" element={<ApiKeys />} />
         </Route>
 

@@ -112,3 +112,13 @@ model ApiKey {
   updatedAt       DateTime @updatedAt
   totalTokensUsed Int      @default(0)
 }
+
+model WorkOrderFlow {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  formSchema   String?
+  workflowData String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

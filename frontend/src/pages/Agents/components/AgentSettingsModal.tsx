@@ -63,7 +63,7 @@ export default function AgentSettingsModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-800">
-            Agent 设置
+            智能体设置
           </h2>
           <button
             onClick={onClose}
@@ -92,7 +92,7 @@ export default function AgentSettingsModal({
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              placeholder="Agent Name"
+              placeholder="智能体名称"
             />
           </div>
 
@@ -107,7 +107,7 @@ export default function AgentSettingsModal({
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
-              placeholder="Brief description..."
+              placeholder="简短描述..."
             />
           </div>
 

@@ -23,7 +23,7 @@ export default function Layout() {
     { name: "智能体中心", path: "/agents", icon: <Bot className="w-5 h-5 shrink-0" /> },
     { name: "题库中心", path: "/datasets", icon: <BookOpen className="w-5 h-5 shrink-0" /> },
     { name: "测评中心", path: "/evaluations", icon: <Activity className="w-5 h-5 shrink-0" /> },
-    { name: "API Keys", path: "/api-keys", icon: <Key className="w-5 h-5 shrink-0" /> },
+    { name: "API 密钥", path: "/api-keys", icon: <Key className="w-5 h-5 shrink-0" /> },
   ];
 
   return (
@@ -31,7 +31,7 @@ export default function Layout() {
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between h-14 bg-white border-b border-gray-200 px-4">
         <h1 className="text-lg font-bold text-gray-800 tracking-tight">
-          LLM Eval Platform
+          LLM 测评平台
         </h1>
         <button
           onClick={() => setIsSidebarOpen(true)}
@@ -57,7 +57,7 @@ export default function Layout() {
       >
         <div className={`h-14 md:h-16 flex items-center px-6 border-b border-gray-200 relative ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
           <h1 className={`text-xl font-bold text-gray-800 tracking-tight hidden md:block whitespace-nowrap transition-opacity duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
-            LLM Eval Platform
+            LLM 测评平台
           </h1>
           <h1 className="text-lg font-bold text-gray-800 tracking-tight md:hidden">
             菜单

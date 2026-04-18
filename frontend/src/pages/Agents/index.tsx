@@ -125,7 +125,7 @@ export default function Agents() {
                       onClick={() => setSelectedAgent({ id: agent.id, name: agent.name })}
                       className="text-gray-600 hover:text-gray-900 text-sm font-medium flex items-center"
                     >
-                      <Code className="w-4 h-4 mr-1" /> API Integration
+                      <Code className="w-4 h-4 mr-1" /> API 接入
                     </button>
                     <button
                       onClick={() => navigate(`/agents/${agent.id}/edit`)}
@@ -209,7 +209,7 @@ export default function Agents() {
                         <button
                           onClick={() => setSelectedAgent({ id: agent.id, name: agent.name })}
                           className="text-gray-500 hover:text-gray-900 transition-colors"
-                          title="API Integration"
+                          title="API 接入"
                         >
                           <Code className="w-4 h-4" />
                         </button>

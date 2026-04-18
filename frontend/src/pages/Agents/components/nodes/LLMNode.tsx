@@ -11,13 +11,13 @@ export default function LLMNode({ data, selected }: any) {
       />
       <div className="bg-blue-50 rounded-t-lg p-2 flex items-center gap-2 border-b border-gray-100">
         <Cpu className="w-4 h-4 text-blue-600" />
-        <span className="font-medium text-sm text-gray-700">LLM Node</span>
+        <span className="font-medium text-sm text-gray-700">LLM 节点</span>
       </div>
       <div className="p-3 flex flex-col gap-2">
-        <div className="text-sm font-semibold text-gray-800">{data.label || 'Generate response'}</div>
+        <div className="text-sm font-semibold text-gray-800">{data.label || '生成回复'}</div>
         {data.modelId && (
           <div className="text-xs text-gray-500 truncate bg-gray-50 p-1 rounded">
-            Model: {data.modelId}
+            模型: {data.modelId}
           </div>
         )}
       </div>

@@ -11,10 +11,10 @@ export default function EndNode({ data, selected }: any) {
       />
       <div className="bg-red-50 rounded-t-lg p-2 flex items-center gap-2 border-b border-gray-100">
         <Square className="w-4 h-4 text-red-600" />
-        <span className="font-medium text-sm text-gray-700">End</span>
+        <span className="font-medium text-sm text-gray-700">结束</span>
       </div>
       <div className="p-3">
-        <div className="text-xs text-gray-500">{data.label || 'End of flow'}</div>
+        <div className="text-xs text-gray-500">{data.label || '流程结束'}</div>
       </div>
     </div>
   );

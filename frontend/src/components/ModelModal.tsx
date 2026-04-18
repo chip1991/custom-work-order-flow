@@ -129,7 +129,7 @@ export default function ModelModal({ isOpen, onClose, onSuccess, editingModel }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Base URL
+              基础 URL
             </label>
             <input
               type="text"
@@ -142,7 +142,7 @@ export default function ModelModal({ isOpen, onClose, onSuccess, editingModel }:
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              API Key
+              API 密钥
             </label>
             <input
               type="password"
@@ -156,7 +156,7 @@ export default function ModelModal({ isOpen, onClose, onSuccess, editingModel }:
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Temperature
+                温度
               </label>
               <input
                 type="number"
@@ -180,7 +180,7 @@ export default function ModelModal({ isOpen, onClose, onSuccess, editingModel }:
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Max Tokens
+                最大 Tokens
               </label>
               <input
                 type="number"

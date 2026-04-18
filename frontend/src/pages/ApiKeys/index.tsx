@@ -44,7 +44,7 @@ export default function ApiKeys() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this API key? This action cannot be undone.")) {
+    if (!confirm("您确定要删除此 API 密钥吗？此操作无法撤销。")) {
       return;
     }
 
@@ -68,10 +68,10 @@ export default function ApiKeys() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
             <Key className="w-6 h-6 text-blue-600" />
-            API Keys
+            API 密钥
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Manage your API keys for accessing the platform programmatically.
+            管理您的 API 密钥以通过程序访问平台。
           </p>
         </div>
         <button
@@ -79,26 +79,26 @@ export default function ApiKeys() {
           className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
-          Create API Key
+          创建 API 密钥
         </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading...</div>
+          <div className="p-8 text-center text-gray-500">加载中...</div>
         ) : apiKeys.length === 0 ? (
           <div className="p-12 text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-50 text-blue-600 mb-4">
               <Key className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-1">No API keys yet</h3>
-            <p className="text-gray-500 mb-4">Create your first API key to get started.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">暂无 API 密钥</h3>
+            <p className="text-gray-500 mb-4">创建您的第一个 API 密钥以开始。</p>
             <button
               onClick={() => setIsModalOpen(true)}
               className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
             >
               <Plus className="w-4 h-4" />
-              Create API Key
+              创建 API 密钥
             </button>
           </div>
         ) : (
@@ -106,10 +106,10 @@ export default function ApiKeys() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Key</th>
-                  <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                  <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                  <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">名称</th>
+                  <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">密钥</th>
+                  <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
+                  <th className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -126,7 +126,7 @@ export default function ApiKeys() {
                         <button
                           onClick={() => copyToClipboard(apiKey.id, apiKey.key)}
                           className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-md transition-colors"
-                          title="Copy API Key"
+                          title="复制 API 密钥"
                         >
                           {copiedId === apiKey.id ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                         </button>
@@ -139,7 +139,7 @@ export default function ApiKeys() {
                       <button
                         onClick={() => handleDelete(apiKey.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center justify-center"
-                        title="Delete API Key"
+                        title="删除 API 密钥"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -156,7 +156,7 @@ export default function ApiKeys() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Create API Key</h3>
+              <h3 className="text-lg font-semibold text-gray-900">创建 API 密钥</h3>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-100 transition-colors"
@@ -169,7 +169,7 @@ export default function ApiKeys() {
               <div className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Key Name
+                    密钥名称
                   </label>
                   <input
                     type="text"
@@ -178,11 +178,11 @@ export default function ApiKeys() {
                     value={newKeyName}
                     onChange={(e) => setNewKeyName(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
-                    placeholder="e.g., Production API, Development"
+                    placeholder="例如：生产 API，开发环境"
                     autoFocus
                   />
                   <p className="mt-1.5 text-xs text-gray-500">
-                    A descriptive name to help you identify this key later.
+                    一个描述性名称，帮助您稍后识别此密钥。
                   </p>
                 </div>
               </div>
@@ -193,14 +193,14 @@ export default function ApiKeys() {
                   onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  Cancel
+                  取消
                 </button>
                 <button
                   type="submit"
                   disabled={creating || !newKeyName.trim()}
                   className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {creating ? "Creating..." : "Create"}
+                  {creating ? "创建中..." : "创建"}
                 </button>
               </div>
             </form>

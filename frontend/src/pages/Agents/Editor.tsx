@@ -145,12 +145,12 @@ export default function AgentEditor() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-gray-900 leading-tight">
-                {agentData.name || '未命名 Agent'}
+                {agentData.name || '未命名智能体'}
               </h1>
               <button 
                 onClick={() => setIsSettingsModalOpen(true)}
                 className="p-1 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
-                title="Agent 设置"
+                title="智能体设置"
               >
                 <Edit2 className="w-4 h-4" />
               </button>
@@ -178,7 +178,7 @@ export default function AgentEditor() {
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="w-4 h-4 mr-2" />
-            {saving ? '保存中...' : '保存 Agent'}
+            {saving ? '保存中...' : '保存智能体'}
           </button>
         </div>
       </header>

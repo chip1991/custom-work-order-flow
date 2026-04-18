@@ -227,9 +227,9 @@ export default function DatasetEditor() {
                       onChange={(e) => handleMessageChange(index, 'role', e.target.value)}
                       className="block w-full sm:w-32 px-3 py-2 sm:py-1.5 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50"
                     >
-                      <option value="system">System</option>
-                      <option value="user">User</option>
-                      <option value="assistant">Assistant</option>
+                      <option value="system">系统</option>
+                      <option value="user">用户</option>
+                      <option value="assistant">助手</option>
                     </select>
                     
                     {/* Desktop delete button (shows only on larger screens) */}

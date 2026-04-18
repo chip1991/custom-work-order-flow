@@ -125,7 +125,7 @@ print(response.choices[0].message.content)`,
           <div className="mt-6 bg-blue-50/50 border border-blue-100 rounded-lg p-4">
             <h4 className="text-sm font-medium text-blue-900 mb-2">注意事项</h4>
             <ul className="text-sm text-blue-800 space-y-1.5 list-disc list-inside">
-              <li>请确保您已在"API Keys"页面创建并获取了有效的 API Key。</li>
+              <li>请确保您已在"API 密钥"页面创建并获取了有效的 API 密钥。</li>
               <li>此接口完全兼容 OpenAI SDK。</li>
               <li>流式响应 (stream: true) 同样受支持。</li>
             </ul>

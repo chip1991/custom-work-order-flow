@@ -130,7 +130,7 @@ export default function AgentEditor() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white overflow-hidden">
+    <div className="flex flex-col h-screen w-full bg-white overflow-hidden">
       {/* Header */}
       <header className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-4 flex items-center justify-between z-10">
         <div className="flex items-center space-x-4">

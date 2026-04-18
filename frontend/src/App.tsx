@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import Home from "@/pages/Home";
 import Layout from "@/components/Layout";
 import Models from "@/pages/Models";
@@ -14,6 +14,15 @@ import EvaluationsDetail from "@/pages/Evaluations/Detail";
 
 import DocumentPage from "@/pages/Document";
 
+// 简单的鉴权组件，用于保护全屏路由
+function AuthGuard() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return <Outlet />;
+}
+
 export default function App() {
   return (
     <Router>
@@ -22,14 +31,18 @@ export default function App() {
         
         {/* Public Documents */}
         <Route path="/docs/:type" element={<DocumentPage />} />
+
+        {/* 全屏私有路由 (无侧边栏) */}
+        <Route element={<AuthGuard />}>
+          <Route path="/agents/new" element={<AgentEditor />} />
+          <Route path="/agents/:id/edit" element={<AgentEditor />} />
+        </Route>
         
-        {/* Main Application Layout */}
+        {/* Main Application Layout (带侧边栏) */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/models" replace />} />
           <Route path="models" element={<Models />} />
           <Route path="agents" element={<Agents />} />
-          <Route path="agents/new" element={<AgentEditor />} />
-          <Route path="agents/:id/edit" element={<AgentEditor />} />
           
           <Route path="datasets" element={<Datasets />} />
           <Route path="datasets/new" element={<DatasetEditor />} />

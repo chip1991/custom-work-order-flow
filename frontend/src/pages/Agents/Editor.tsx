@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Save, ArrowLeft, AlertCircle, Edit2 } from 'lucide-react';
 import { getAgent, createAgent, updateAgent } from '@/api/agents';
 import { Model, fetchModels } from '@/lib/api';
 import { ReactFlowProvider, Node, Edge } from '@xyflow/react';
@@ -8,6 +8,7 @@ import { ReactFlowProvider, Node, Edge } from '@xyflow/react';
 import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import PropertiesPanel from './components/PropertiesPanel';
+import AgentSettingsModal, { AgentSettingsData } from './components/AgentSettingsModal';
 
 export default function AgentEditor() {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +31,7 @@ export default function AgentEditor() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
   useEffect(() => {
     loadModels();
@@ -141,10 +143,19 @@ export default function AgentEditor() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 leading-tight">
-              {isEditing ? '编辑 Agent 流程' : '新增 Agent 流程'}
-            </h1>
-            <p className="text-sm text-gray-500">{agentData.name || '未命名 Agent'}</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold text-gray-900 leading-tight">
+                {agentData.name || '未命名 Agent'}
+              </h1>
+              <button 
+                onClick={() => setIsSettingsModalOpen(true)}
+                className="p-1 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                title="Agent 设置"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-500">{agentData.description || '暂无描述'}</p>
           </div>
         </div>
 
@@ -191,11 +202,18 @@ export default function AgentEditor() {
         <PropertiesPanel
           selectedNode={selectedNode}
           onUpdateNodeData={updateNodeData}
-          agentData={agentData}
-          onUpdateAgentData={setAgentData}
           models={models}
         />
       </div>
+
+      {/* Settings Modal */}
+      <AgentSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        onSave={(data: AgentSettingsData) => setAgentData(prev => ({ ...prev, ...data }))}
+        agentData={agentData}
+        models={models}
+      />
     </div>
   );
 }

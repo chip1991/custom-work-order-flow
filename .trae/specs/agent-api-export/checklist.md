@@ -1,0 +1,4 @@
+- [x] `ApiKey` 数据库表成功建立。
+- [x] 存在开放的网关 `/api/v1/chat/completions`，支持接收带 `Authorization` 头部的请求。
+- [x] 该开放网关能够根据请求体中的 `model` 字段查找到对应的 Agent，并将 Agent 的系统提示词（System Prompt）插入到上下文中进行大模型调用。
+- [x] 前端 Agent 列表中存在“API 接入”操作入口，点击后能够弹窗显示当前 Agent 对应的 `cURL` 代码片段，并且代码中的 `model` 值正确填入了该 Agent 的 ID。

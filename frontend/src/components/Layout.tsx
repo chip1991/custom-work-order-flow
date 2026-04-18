@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
-import { Cpu, BookOpen, Activity, LogOut, Menu, X, Bot, ChevronLeft, ChevronRight } from "lucide-react";
+import { Cpu, BookOpen, Activity, LogOut, Menu, X, Bot, ChevronLeft, ChevronRight, Key } from "lucide-react";
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -23,6 +23,7 @@ export default function Layout() {
     { name: "智能体中心", path: "/agents", icon: <Bot className="w-5 h-5 shrink-0" /> },
     { name: "题库中心", path: "/datasets", icon: <BookOpen className="w-5 h-5 shrink-0" /> },
     { name: "测评中心", path: "/evaluations", icon: <Activity className="w-5 h-5 shrink-0" /> },
+    { name: "API Keys", path: "/api-keys", icon: <Key className="w-5 h-5 shrink-0" /> },
   ];
 
   return (

@@ -21,6 +21,10 @@ app.use('/api/models', require('./routes/models'));
 app.use('/api/agents', require('./routes/agents'));
 app.use('/api/questions', require('./routes/questions'));
 app.use('/api/tasks', require('./routes/tasks'));
+app.use('/api/api-keys', require('./routes/api-keys'));
+
+// v1 API (OpenAI compatible)
+app.use('/api/v1', require('./routes/v1-chat'));
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

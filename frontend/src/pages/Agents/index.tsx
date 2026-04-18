@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
-import { Search, Plus, Edit2, Trash2, Bot, Cpu } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, Bot, Cpu, Code } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Agent, getAgents, deleteAgent } from "@/api/agents";
+import ApiIntegrationModal from "./components/ApiIntegrationModal";
 
 export default function Agents() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function Agents() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedAgent, setSelectedAgent] = useState<{ id: string; name: string } | null>(null);
   const itemsPerPage = 10;
 
   const loadAgents = async () => {
@@ -120,6 +122,12 @@ export default function Agents() {
                   </div>
                   <div className="flex items-center justify-end space-x-4 border-t border-gray-100 pt-3 mt-3">
                     <button
+                      onClick={() => setSelectedAgent({ id: agent.id, name: agent.name })}
+                      className="text-gray-600 hover:text-gray-900 text-sm font-medium flex items-center"
+                    >
+                      <Code className="w-4 h-4 mr-1" /> API Integration
+                    </button>
+                    <button
                       onClick={() => navigate(`/agents/${agent.id}/edit`)}
                       className="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center"
                     >
@@ -199,6 +207,13 @@ export default function Agents() {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-3">
                         <button
+                          onClick={() => setSelectedAgent({ id: agent.id, name: agent.name })}
+                          className="text-gray-500 hover:text-gray-900 transition-colors"
+                          title="API Integration"
+                        >
+                          <Code className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => navigate(`/agents/${agent.id}/edit`)}
                           className="text-indigo-600 hover:text-indigo-900 transition-colors"
                           title="编辑"
@@ -270,6 +285,13 @@ export default function Agents() {
           </div>
         )}
       </div>
+
+      <ApiIntegrationModal
+        isOpen={!!selectedAgent}
+        onClose={() => setSelectedAgent(null)}
+        agentId={selectedAgent?.id || ""}
+        agentName={selectedAgent?.name || ""}
+      />
     </div>
   );
 }

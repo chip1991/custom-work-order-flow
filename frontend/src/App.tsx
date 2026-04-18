@@ -13,6 +13,7 @@ import EvaluationsCreate from "@/pages/Evaluations/Create";
 import EvaluationsDetail from "@/pages/Evaluations/Detail";
 
 import DocumentPage from "@/pages/Document";
+import ApiKeys from "@/pages/ApiKeys";
 
 // 简单的鉴权组件，用于保护全屏路由
 function AuthGuard() {
@@ -51,6 +52,8 @@ export default function App() {
           <Route path="evaluations" element={<EvaluationsList />} />
           <Route path="evaluations/new" element={<EvaluationsCreate />} />
           <Route path="evaluations/:id" element={<EvaluationsDetail />} />
+          
+          <Route path="api-keys" element={<ApiKeys />} />
         </Route>
 
         {/* Fallback */}

@@ -132,7 +132,7 @@ export function DatasetDetailPage() {
 
       <Card title="Import JSONL" actions={null}>
         <div className="stackSmall">
-          <div className="muted">每行一个 JSON；至少包含 input 字段。示例：{"input":"q1"}</div>
+          <div className="muted">每行一个 JSON；至少包含 input 字段。示例：{"{"}"input":"q1"{"}"}</div>
           <TextArea value={jsonl} onChange={setJsonl} rows={10} placeholder='{"input":"q1"}\n{"input":"q2"}\n' />
           <div className="row">
             <Button

@@ -79,7 +79,14 @@ export function PromptTemplateFormPage(props: { mode: Mode }) {
               <Field label="名称">
                 <TextInput value={name} onChange={setName} />
               </Field>
-              <Field label="模板" hint={<span className="muted">支持变量：{{input}} 或 {{input.text}} 等</span>}>
+              <Field
+                label="模板"
+                hint={
+                  <span className="muted">
+                    支持变量：{"{{input}}"} 或 {"{{input.text}}"} 等
+                  </span>
+                }
+              >
                 <TextArea value={template} onChange={setTemplate} rows={10} />
               </Field>
             </div>

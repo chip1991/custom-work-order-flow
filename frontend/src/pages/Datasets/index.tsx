@@ -40,19 +40,15 @@ export default function Datasets() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">题库中心</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            管理用于大模型测评的题目和多轮对话数据
-          </p>
+        <div className="flex items-center gap-4">
+          <Link
+            to="/datasets/new"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            新增题目
+          </Link>
         </div>
-        <Link
-          to="/datasets/new"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          新增题目
-        </Link>
       </div>
 
       {questions.length === 0 ? (

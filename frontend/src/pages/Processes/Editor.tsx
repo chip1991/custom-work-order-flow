@@ -264,31 +264,78 @@ export default function ProcessEditor() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   适用小区
                 </label>
-                <input
-                  type="text"
-                  value={processData.communities.join(', ')}
-                  onChange={(e) => setProcessData({ ...processData, communities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
-                  placeholder="请输入适用小区（用逗号分隔，如：A区, B区）"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
+                <div className="flex gap-4">
+                  {['朝阳小区', '海淀小区', '望京小区'].map(community => (
+                    <label key={community} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={processData.communities.includes(community)}
+                        onChange={(e) => {
+                          const newCommunities = e.target.checked
+                            ? [...processData.communities, community]
+                            : processData.communities.filter(c => c !== community);
+                          setProcessData({ ...processData, communities: newCommunities });
+                        }}
+                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span className="text-sm text-gray-700">{community}</span>
+                    </label>
+                  ))}
+                </div>
                 <p className="mt-1 text-xs text-gray-500">留空表示适用于所有小区</p>
               </div>
 
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    处理时效 (小时)
+                    处理时效
                   </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={processData.timeLimit}
-                    onChange={(e) => setProcessData({ ...processData, timeLimit: parseInt(e.target.value, 10) || 24 })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      value={Math.floor(processData.timeLimit / (24 * 60))}
+                      onChange={(e) => {
+                        const d = parseInt(e.target.value, 10) || 0;
+                        const h = Math.floor((processData.timeLimit % (24 * 60)) / 60);
+                        const m = processData.timeLimit % 60;
+                        setProcessData({ ...processData, timeLimit: d * 24 * 60 + h * 60 + m });
+                      }}
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                    <span className="text-sm text-gray-700">天</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="23"
+                      value={Math.floor((processData.timeLimit % (24 * 60)) / 60)}
+                      onChange={(e) => {
+                        const d = Math.floor(processData.timeLimit / (24 * 60));
+                        const h = parseInt(e.target.value, 10) || 0;
+                        const m = processData.timeLimit % 60;
+                        setProcessData({ ...processData, timeLimit: d * 24 * 60 + h * 60 + m });
+                      }}
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                    <span className="text-sm text-gray-700">小时</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={processData.timeLimit % 60}
+                      onChange={(e) => {
+                        const d = Math.floor(processData.timeLimit / (24 * 60));
+                        const h = Math.floor((processData.timeLimit % (24 * 60)) / 60);
+                        const m = parseInt(e.target.value, 10) || 0;
+                        setProcessData({ ...processData, timeLimit: d * 24 * 60 + h * 60 + m });
+                      }}
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                    <span className="text-sm text-gray-700">分钟</span>
+                  </div>
                 </div>
 
                 <div>
@@ -302,6 +349,7 @@ export default function ProcessEditor() {
                   >
                     <option value="active">启用</option>
                     <option value="inactive">停用</option>
+                    <option value="draft">草稿</option>
                   </select>
                 </div>
               </div>

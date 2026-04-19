@@ -64,9 +64,16 @@ router.put('/:id', async (req, res) => {
     const updateData = {};
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
-    if (communities !== undefined) updateData.communities = communities;
-    if (status !== undefined) updateData.status = status;
-    if (timeLimit !== undefined) updateData.timeLimit = parseInt(timeLimit, 10);
+    if (communities !== undefined) {
+      updateData.communities = typeof communities === 'string' ? communities : JSON.stringify(communities);
+    }
+    if (status !== undefined) {
+      updateData.status = String(status);
+    }
+    if (timeLimit !== undefined) {
+      const parsedTime = parseInt(timeLimit, 10);
+      updateData.timeLimit = isNaN(parsedTime) ? 24 : parsedTime;
+    }
     if (nodes !== undefined) updateData.nodes = nodes;
     if (edges !== undefined) updateData.edges = edges;
     if (formConfig !== undefined) updateData.formConfig = formConfig;

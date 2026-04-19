@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, AlignLeft, FileText, Hash, Calendar, Paperclip, DollarSign, CircleDot, CheckSquare, CalendarRange, LayoutGrid, SlidersHorizontal, Eye, Plus, X, Settings } from 'lucide-react';
+import { Trash2, AlignLeft, FileText, Hash, Calendar, Paperclip, DollarSign, CircleDot, CheckSquare, CalendarRange, LayoutGrid, SlidersHorizontal, Eye, Plus, X, Settings, Image as ImageIcon } from 'lucide-react';
 
 export interface FormField {
   id: string;
@@ -16,6 +16,7 @@ export interface FormField {
     operator: string;
     value: string;
   };
+  maxImages?: number;
 }
 
 interface FormBuilderProps {
@@ -33,6 +34,7 @@ const FIELD_TYPES = [
   { type: 'date', label: '日期', icon: Calendar },
   { type: 'dateRange', label: '日期区间', icon: CalendarRange },
   { type: 'attachment', label: '附件', icon: Paperclip },
+  { type: 'image', label: '图片', icon: ImageIcon },
 ];
 
 export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
@@ -235,6 +237,11 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                         <Paperclip className="w-5 h-5 mb-1 text-gray-400" />
                         <span>点击或拖拽上传附件</span>
                       </div>
+                    ) : field.type === 'image' ? (
+                      <div className="w-full px-3 py-4 border-2 border-dashed border-gray-300 rounded-md bg-gray-50 flex flex-col items-center justify-center text-gray-500 sm:text-sm">
+                        <ImageIcon className="w-5 h-5 mb-1 text-gray-400" />
+                        <span>点击或拖拽上传图片{field.maxImages ? ` (最多 ${field.maxImages} 张)` : ''}</span>
+                      </div>
                     ) : field.type === 'amount' ? (
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -409,6 +416,20 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                       value={selectedField.unit || ''}
                       onChange={(e) => updateSelectedField('unit', e.target.value)}
                       placeholder="例如: 天、元"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                )}
+
+                {selectedField.type === 'image' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">最大图片数量 (Max Images)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={selectedField.maxImages || ''}
+                      onChange={(e) => updateSelectedField('maxImages', e.target.value ? parseInt(e.target.value, 10) : undefined)}
+                      placeholder="不限制"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     />
                   </div>

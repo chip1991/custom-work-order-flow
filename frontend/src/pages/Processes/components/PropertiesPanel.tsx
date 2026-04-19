@@ -68,6 +68,44 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formCo
             </div>
           )}
 
+          {(type === 'approvalNode' || type === 'taskNode') && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">节点描述</label>
+                <textarea
+                  value={(data.description as string) || ''}
+                  onChange={(e) => onUpdateNodeData(id, { description: e.target.value })}
+                  placeholder="输入节点描述信息"
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">审批方式</label>
+                <select
+                  value={(data.approvalType as string) || 'or'}
+                  onChange={(e) => onUpdateNodeData(id, { approvalType: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                >
+                  <option value="or">或签 (一名审批人同意即可)</option>
+                  <option value="and">会签 (所有审批人同意才可)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">办理时限 (小时)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={(data.timeLimit as number) || ''}
+                  onChange={(e) => onUpdateNodeData(id, { timeLimit: Number(e.target.value) })}
+                  placeholder="例如: 24"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+            </>
+          )}
+
           {type === 'condition' && (
             <div className="space-y-4">
               <div>
@@ -121,26 +159,62 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formCo
               暂无全局表单字段，请先在“表单配置”中添加
             </p>
           ) : (
-            <div className="space-y-4">
-              {formConfig.map((field) => (
-                <div key={field.id} className="p-4 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{field.name || '未命名字段'}</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      类型: {field.type} {field.required ? '(必填)' : ''}
-                    </div>
-                  </div>
-                  <select
-                    value={fieldPermissions[field.id] || 'editable'}
-                    onChange={(e) => handlePermissionChange(field.id, e.target.value)}
-                    className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  >
-                    <option value="editable">可写 (Editable)</option>
-                    <option value="readonly">只读 (Readonly)</option>
-                    <option value="hidden">隐藏 (Hidden)</option>
-                  </select>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">字段信息</th>
+                    <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">可编辑</th>
+                    <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">只读</th>
+                    <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">隐藏</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {formConfig.map((field) => {
+                    const currentPermission = fieldPermissions[field.id] || 'editable';
+                    return (
+                      <tr key={field.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{field.name || '未命名字段'}</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            类型: {field.type} {field.required ? '(必填)' : ''}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            type="radio"
+                            name={`permission-${field.id}`}
+                            value="editable"
+                            checked={currentPermission === 'editable'}
+                            onChange={(e) => handlePermissionChange(field.id, e.target.value)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            type="radio"
+                            name={`permission-${field.id}`}
+                            value="readonly"
+                            checked={currentPermission === 'readonly'}
+                            onChange={(e) => handlePermissionChange(field.id, e.target.value)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            type="radio"
+                            name={`permission-${field.id}`}
+                            value="hidden"
+                            checked={currentPermission === 'hidden'}
+                            onChange={(e) => handlePermissionChange(field.id, e.target.value)}
+                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

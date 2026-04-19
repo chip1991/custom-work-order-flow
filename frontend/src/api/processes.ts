@@ -4,11 +4,12 @@ export interface Process {
   description: string | null;
   nodes: string;
   edges: string;
+  formConfig?: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-export type CreateProcessDto = Pick<Process, 'name' | 'description' | 'nodes' | 'edges'>;
+export type CreateProcessDto = Pick<Process, 'name' | 'description' | 'nodes' | 'edges' | 'formConfig'>;
 export type UpdateProcessDto = Partial<CreateProcessDto>;
 
 export const getProcesses = async (): Promise<Process[]> => {

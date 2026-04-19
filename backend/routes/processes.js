@@ -35,13 +35,14 @@ router.get('/:id', async (req, res) => {
 // Create a new process
 router.post('/', async (req, res) => {
   try {
-    const { name, description, nodes, edges } = req.body;
+    const { name, description, nodes, edges, formConfig } = req.body;
     const process = await prisma.process.create({
       data: {
         name: name || 'Untitled Process',
         description: description || '',
         nodes: nodes || '[]',
-        edges: edges || '[]'
+        edges: edges || '[]',
+        formConfig: formConfig || '[]'
       }
     });
     res.status(201).json(process);
@@ -54,14 +55,15 @@ router.post('/', async (req, res) => {
 // Update an existing process
 router.put('/:id', async (req, res) => {
   try {
-    const { name, description, nodes, edges } = req.body;
+    const { name, description, nodes, edges, formConfig } = req.body;
     const process = await prisma.process.update({
       where: { id: req.params.id },
       data: {
         name,
         description,
         nodes,
-        edges
+        edges,
+        formConfig
       }
     });
     res.json(process);

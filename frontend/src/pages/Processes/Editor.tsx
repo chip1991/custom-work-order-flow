@@ -6,6 +6,7 @@ import { ReactFlowProvider, Node, Edge } from '@xyflow/react';
 import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import PropertiesPanel from './components/PropertiesPanel';
+import FormBuilder, { FormField } from './components/FormBuilder';
 import { getProcess, createProcess, updateProcess } from '@/api/processes';
 
 type TabType = 'basic' | 'form' | 'node';
@@ -26,6 +27,7 @@ export default function ProcessEditor() {
     description: '',
   });
 
+  const [formConfig, setFormConfig] = useState<FormField[]>([]);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -44,6 +46,7 @@ export default function ProcessEditor() {
         name: data.name,
         description: data.description || '',
       });
+      setFormConfig(JSON.parse(data.formConfig || '[]'));
       setNodes(JSON.parse(data.nodes || '[]'));
       setEdges(JSON.parse(data.edges || '[]'));
     } catch (err: any) {
@@ -65,6 +68,7 @@ export default function ProcessEditor() {
       const payload = {
         name: processData.name,
         description: processData.description,
+        formConfig: JSON.stringify(formConfig),
         nodes: JSON.stringify(nodes),
         edges: JSON.stringify(edges),
       };
@@ -191,6 +195,7 @@ export default function ProcessEditor() {
               <PropertiesPanel
                 selectedNode={selectedNode}
                 onUpdateNodeData={updateNodeData}
+                formConfig={formConfig}
               />
             </div>
           </div>
@@ -211,10 +216,7 @@ export default function ProcessEditor() {
       {activeTab === 'form' && (
         <div className="flex-1 overflow-auto p-6 bg-gray-50">
           <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8 border border-gray-200 min-h-[600px]">
-            <h2 className="text-lg font-medium text-gray-900 mb-6">表单配置</h2>
-            <div className="text-center py-12 text-gray-500">
-              表单配置占位区
-            </div>
+            <FormBuilder fields={formConfig} onChange={setFormConfig} />
           </div>
         </div>
       )}

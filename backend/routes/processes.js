@@ -35,11 +35,14 @@ router.get('/:id', async (req, res) => {
 // Create a new process
 router.post('/', async (req, res) => {
   try {
-    const { name, description, nodes, edges, formConfig } = req.body;
+    const { name, description, communities, status, timeLimit, nodes, edges, formConfig } = req.body;
     const process = await prisma.process.create({
       data: {
         name: name || 'Untitled Process',
         description: description || '',
+        communities: communities || '[]',
+        status: status || 'active',
+        timeLimit: timeLimit !== undefined ? parseInt(timeLimit, 10) : 24,
         nodes: nodes || '[]',
         edges: edges || '[]',
         formConfig: formConfig || '[]'
@@ -55,16 +58,22 @@ router.post('/', async (req, res) => {
 // Update an existing process
 router.put('/:id', async (req, res) => {
   try {
-    const { name, description, nodes, edges, formConfig } = req.body;
+    const { name, description, communities, status, timeLimit, nodes, edges, formConfig } = req.body;
+    
+    // Build update data, only include fields that are provided
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (communities !== undefined) updateData.communities = communities;
+    if (status !== undefined) updateData.status = status;
+    if (timeLimit !== undefined) updateData.timeLimit = parseInt(timeLimit, 10);
+    if (nodes !== undefined) updateData.nodes = nodes;
+    if (edges !== undefined) updateData.edges = edges;
+    if (formConfig !== undefined) updateData.formConfig = formConfig;
+
     const process = await prisma.process.update({
       where: { id: req.params.id },
-      data: {
-        name,
-        description,
-        nodes,
-        edges,
-        formConfig
-      }
+      data: updateData
     });
     res.json(process);
   } catch (error) {

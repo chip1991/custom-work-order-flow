@@ -2,6 +2,9 @@ export interface Process {
   id: string;
   name: string;
   description: string | null;
+  communities: string | null;
+  status: string | null;
+  timeLimit: number | null;
   nodes: string;
   edges: string;
   formConfig?: string | null;
@@ -9,7 +12,7 @@ export interface Process {
   updatedAt: string;
 }
 
-export type CreateProcessDto = Pick<Process, 'name' | 'description' | 'nodes' | 'edges' | 'formConfig'>;
+export type CreateProcessDto = Pick<Process, 'name' | 'description' | 'communities' | 'status' | 'timeLimit' | 'nodes' | 'edges' | 'formConfig'>;
 export type UpdateProcessDto = Partial<CreateProcessDto>;
 
 export const getProcesses = async (): Promise<Process[]> => {

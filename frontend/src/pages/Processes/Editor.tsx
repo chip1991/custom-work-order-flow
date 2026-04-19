@@ -25,6 +25,9 @@ export default function ProcessEditor() {
   const [processData, setProcessData] = useState({
     name: '新建流程',
     description: '',
+    communities: [] as string[],
+    status: 'active',
+    timeLimit: 24,
   });
 
   const [formConfig, setFormConfig] = useState<FormField[]>([]);
@@ -45,6 +48,9 @@ export default function ProcessEditor() {
       setProcessData({
         name: data.name,
         description: data.description || '',
+        communities: data.communities ? JSON.parse(data.communities) : [],
+        status: data.status || 'active',
+        timeLimit: data.timeLimit || 24,
       });
       setFormConfig(JSON.parse(data.formConfig || '[]'));
       setNodes(JSON.parse(data.nodes || '[]'));
@@ -68,6 +74,9 @@ export default function ProcessEditor() {
       const payload = {
         name: processData.name,
         description: processData.description,
+        communities: JSON.stringify(processData.communities),
+        status: processData.status,
+        timeLimit: processData.timeLimit,
         formConfig: JSON.stringify(formConfig),
         nodes: JSON.stringify(nodes),
         edges: JSON.stringify(edges),
@@ -206,8 +215,77 @@ export default function ProcessEditor() {
         <div className="flex-1 overflow-auto p-6 bg-gray-50">
           <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-8 border border-gray-200">
             <h2 className="text-lg font-medium text-gray-900 mb-6">基础信息</h2>
-            <div className="text-center py-12 text-gray-500">
-              基础信息配置占位区
+            
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  流程名称 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={processData.name}
+                  onChange={(e) => setProcessData({ ...processData, name: e.target.value })}
+                  placeholder="请输入流程名称"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  描述
+                </label>
+                <textarea
+                  value={processData.description}
+                  onChange={(e) => setProcessData({ ...processData, description: e.target.value })}
+                  placeholder="请输入流程描述"
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  适用小区
+                </label>
+                <input
+                  type="text"
+                  value={processData.communities.join(', ')}
+                  onChange={(e) => setProcessData({ ...processData, communities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                  placeholder="请输入适用小区（用逗号分隔，如：A区, B区）"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+                <p className="mt-1 text-xs text-gray-500">留空表示适用于所有小区</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    处理时效 (小时)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={processData.timeLimit}
+                    onChange={(e) => setProcessData({ ...processData, timeLimit: parseInt(e.target.value, 10) || 24 })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    启用状态
+                  </label>
+                  <select
+                    value={processData.status}
+                    onChange={(e) => setProcessData({ ...processData, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  >
+                    <option value="active">启用</option>
+                    <option value="inactive">停用</option>
+                  </select>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>

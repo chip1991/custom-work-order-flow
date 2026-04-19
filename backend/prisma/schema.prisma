@@ -117,6 +117,9 @@ model Process {
   id          String   @id @default(uuid())
   name        String
   description String?
+  communities String?  @default("[]")
+  status      String?  @default("active")
+  timeLimit   Int?     @default(24)
   nodes       String
   edges       String
   formConfig  String?  @default("[]")

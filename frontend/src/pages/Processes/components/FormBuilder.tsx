@@ -6,6 +6,9 @@ export interface FormField {
   name: string;
   type: string;
   required: boolean;
+  placeholder?: string;
+  defaultValue?: string;
+  unit?: string;
 }
 
 interface FormBuilderProps {
@@ -79,6 +82,9 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                       <option value="number">数字 (Number)</option>
                       <option value="date">日期 (Date)</option>
                       <option value="select">下拉选择 (Select)</option>
+                      <option value="user">人员 (User)</option>
+                      <option value="department">部门 (Department)</option>
+                      <option value="attachment">附件 (Attachment)</option>
                     </select>
                   </div>
                 </div>
@@ -93,6 +99,41 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                   <label htmlFor={`required-${field.id}`} className="ml-2 block text-sm text-gray-700">
                     必填项
                   </label>
+                </div>
+                <div className="pt-4 border-t border-gray-100 mt-4">
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">高级配置</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">提示语 (Placeholder)</label>
+                      <input
+                        type="text"
+                        value={field.placeholder || ''}
+                        onChange={(e) => updateField(index, 'placeholder', e.target.value)}
+                        placeholder="输入提示语"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">默认值 (Default Value)</label>
+                      <input
+                        type="text"
+                        value={field.defaultValue || ''}
+                        onChange={(e) => updateField(index, 'defaultValue', e.target.value)}
+                        placeholder="输入默认值"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">单位 (Unit)</label>
+                      <input
+                        type="text"
+                        value={field.unit || ''}
+                        onChange={(e) => updateField(index, 'unit', e.target.value)}
+                        placeholder="例如: 天、元"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               <button

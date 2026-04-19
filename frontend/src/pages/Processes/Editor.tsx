@@ -7,12 +7,16 @@ import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import PropertiesPanel from './components/PropertiesPanel';
 
+type TabType = 'basic' | 'form' | 'node';
+
 export default function ProcessEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [activeTab, setActiveTab] = useState<TabType>('node');
 
   const [processData, setProcessData] = useState({
     name: '新建流程',
@@ -55,7 +59,7 @@ export default function ProcessEditor() {
 
   return (
     <div className="flex flex-col h-screen w-full bg-white overflow-hidden">
-      <header className="flex-shrink-0 border-b border-gray-200 bg-white px-6 py-4 flex items-center justify-between z-10">
+      <header className="relative flex-shrink-0 border-b border-gray-200 bg-white px-6 py-4 flex items-center justify-between z-10">
         <div className="flex items-center space-x-4">
           <button
             onClick={() => navigate('/processes')}
@@ -77,6 +81,22 @@ export default function ProcessEditor() {
             </div>
             <p className="text-sm text-gray-500">{processData.description || '暂无描述'}</p>
           </div>
+        </div>
+
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center p-1 bg-gray-100 rounded-lg">
+          {(['basic', 'form', 'node'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                activeTab === tab
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {tab === 'basic' ? '基础信息' : tab === 'form' ? '表单配置' : '节点配置'}
+            </button>
+          ))}
         </div>
 
         <div className="flex items-center space-x-4">
@@ -103,7 +123,7 @@ export default function ProcessEditor() {
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className={`flex-1 overflow-hidden ${activeTab === 'node' ? 'flex' : 'hidden'}`}>
         <Sidebar />
         
         <main className="flex-1 relative">
@@ -136,6 +156,28 @@ export default function ProcessEditor() {
           </div>
         </aside>
       </div>
+
+      {activeTab === 'basic' && (
+        <div className="flex-1 overflow-auto p-6 bg-gray-50">
+          <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-8 border border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900 mb-6">基础信息</h2>
+            <div className="text-center py-12 text-gray-500">
+              基础信息配置占位区
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'form' && (
+        <div className="flex-1 overflow-auto p-6 bg-gray-50">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8 border border-gray-200 min-h-[600px]">
+            <h2 className="text-lg font-medium text-gray-900 mb-6">表单配置</h2>
+            <div className="text-center py-12 text-gray-500">
+              表单配置占位区
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

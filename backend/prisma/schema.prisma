@@ -112,3 +112,14 @@ model ApiKey {
   updatedAt       DateTime @updatedAt
   totalTokensUsed Int      @default(0)
 }
+
+model Process {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  nodes       String
+  edges       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+

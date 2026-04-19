@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Save, ArrowLeft, Edit2, Play, SlidersHorizontal, AlertCircle } from 'lucide-react';
 import { ReactFlowProvider, Node, Edge } from '@xyflow/react';
@@ -6,15 +6,18 @@ import { ReactFlowProvider, Node, Edge } from '@xyflow/react';
 import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
 import PropertiesPanel from './components/PropertiesPanel';
+import { getProcess, createProcess, updateProcess } from '@/api/processes';
 
 type TabType = 'basic' | 'form' | 'node';
 
 export default function ProcessEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isNew = id === 'new';
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(!isNew);
 
   const [activeTab, setActiveTab] = useState<TabType>('node');
 
@@ -26,6 +29,29 @@ export default function ProcessEditor() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+
+  useEffect(() => {
+    if (!isNew && id) {
+      loadProcess(id);
+    }
+  }, [id, isNew]);
+
+  const loadProcess = async (processId: string) => {
+    try {
+      setLoading(true);
+      const data = await getProcess(processId);
+      setProcessData({
+        name: data.name,
+        description: data.description || '',
+      });
+      setNodes(JSON.parse(data.nodes || '[]'));
+      setEdges(JSON.parse(data.edges || '[]'));
+    } catch (err: any) {
+      setError(err.message || '加载失败');
+    } finally {
+      setLoading(false);
+    }
+  };
   
   const handleSave = async () => {
     if (!processData.name.trim()) {
@@ -35,11 +61,25 @@ export default function ProcessEditor() {
     setError(null);
     setSaving(true);
     
-    // Simulate save
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      const payload = {
+        name: processData.name,
+        description: processData.description,
+        nodes: JSON.stringify(nodes),
+        edges: JSON.stringify(edges),
+      };
+
+      if (isNew) {
+        await createProcess(payload);
+      } else {
+        await updateProcess(id!, payload);
+      }
       navigate('/processes');
-    }, 500);
+    } catch (err: any) {
+      setError(err.message || '保存失败');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const updateNodeData = useCallback((nodeId: string, newData: any) => {

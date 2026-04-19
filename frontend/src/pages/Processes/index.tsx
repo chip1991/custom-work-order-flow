@@ -1,17 +1,42 @@
-import { useState } from "react";
-import { Search, Plus, Edit2, Trash2, Network } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Plus, Edit2, Trash2, Network, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getProcesses, deleteProcess, Process } from "@/api/processes";
 
 export default function Processes() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [processes, setProcesses] = useState<Process[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const dummyProcesses = [
-    { id: "1", name: "物业报修流程", description: "处理小区的物业报修工单" },
-    { id: "2", name: "投诉建议流程", description: "处理业主的投诉与建议" },
-  ];
+  useEffect(() => {
+    loadProcesses();
+  }, []);
 
-  const filteredProcesses = dummyProcesses.filter(p => p.name.includes(searchQuery));
+  const loadProcesses = async () => {
+    try {
+      setLoading(true);
+      const data = await getProcesses();
+      setProcesses(data);
+    } catch (error) {
+      console.error("Failed to load processes", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('确定要删除这个流程吗？')) return;
+    try {
+      await deleteProcess(id);
+      setProcesses(processes.filter(p => p.id !== id));
+    } catch (error) {
+      console.error("Failed to delete process", error);
+      alert('删除失败');
+    }
+  };
+
+  const filteredProcesses = processes.filter(p => p.name.includes(searchQuery));
 
   return (
     <div className="h-full flex flex-col space-y-6">
@@ -53,7 +78,16 @@ export default function Processes() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProcesses.map(process => (
+              {loading ? (
+                <tr>
+                  <td colSpan={3} className="px-6 py-12 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <Loader2 className="w-8 h-8 text-indigo-500 animate-spin mb-4" />
+                      <p className="text-sm text-gray-500">加载中...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredProcesses.map(process => (
                 <tr key={process.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -75,14 +109,14 @@ export default function Processes() {
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button className="text-red-600 hover:text-red-900" title="删除">
+                      <button onClick={() => handleDelete(process.id)} className="text-red-600 hover:text-red-900" title="删除">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
                 </tr>
               ))}
-              {filteredProcesses.length === 0 && (
+              {!loading && filteredProcesses.length === 0 && (
                 <tr>
                   <td colSpan={3} className="px-6 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center justify-center">

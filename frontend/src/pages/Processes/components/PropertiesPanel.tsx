@@ -55,7 +55,7 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formCo
             </div>
           )}
 
-          {type === 'taskNode' && (
+          {['taskNode', 'acceptNode', 'callbackNode', 'escalateNode'].includes(type) && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">处理组</label>
               <input
@@ -68,7 +68,7 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formCo
             </div>
           )}
 
-          {(type === 'approvalNode' || type === 'taskNode') && (
+          {(type === 'approvalNode' || ['taskNode', 'acceptNode', 'callbackNode', 'escalateNode'].includes(type)) && (
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">节点描述</label>

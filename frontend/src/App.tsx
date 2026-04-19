@@ -8,6 +8,9 @@ import AgentEditor from "@/pages/Agents/Editor";
 import Datasets from "@/pages/Datasets";
 import DatasetEditor from "@/pages/Datasets/Editor";
 
+import Processes from "@/pages/Processes";
+import ProcessEditor from "@/pages/Processes/Editor";
+
 import EvaluationsList from "@/pages/Evaluations/List";
 import EvaluationsCreate from "@/pages/Evaluations/Create";
 import EvaluationsDetail from "@/pages/Evaluations/Detail";
@@ -37,6 +40,8 @@ export default function App() {
         <Route element={<AuthGuard />}>
           <Route path="/agents/new" element={<AgentEditor />} />
           <Route path="/agents/:id/edit" element={<AgentEditor />} />
+          <Route path="/processes/new" element={<ProcessEditor />} />
+          <Route path="/processes/:id/edit" element={<ProcessEditor />} />
         </Route>
         
         {/* Main Application Layout (带侧边栏) */}
@@ -44,6 +49,8 @@ export default function App() {
           <Route index element={<Navigate to="/models" replace />} />
           <Route path="models" element={<Models />} />
           <Route path="agents" element={<Agents />} />
+          
+          <Route path="processes" element={<Processes />} />
           
           <Route path="datasets" element={<Datasets />} />
           <Route path="datasets/new" element={<DatasetEditor />} />

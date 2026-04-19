@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
-import { Trash2, AlignLeft, FileText, Hash, Calendar, Paperclip, DollarSign, CircleDot, CheckSquare, CalendarRange, LayoutGrid, SlidersHorizontal } from 'lucide-react';
+import { Trash2, AlignLeft, FileText, Hash, Calendar, Paperclip, DollarSign, CircleDot, CheckSquare, CalendarRange, LayoutGrid, SlidersHorizontal, Eye, Plus, X } from 'lucide-react';
 
 export interface FormField {
   id: string;
   name: string;
   type: string;
   required: boolean;
+  description?: string;
   placeholder?: string;
   defaultValue?: string;
   unit?: string;
+  options?: { label: string; value: string }[];
+  visibleCondition?: {
+    dependentFieldId: string;
+    operator: string;
+    value: string;
+  };
 }
 
 interface FormBuilderProps {
@@ -38,6 +45,12 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
       type: type,
       required: false,
     };
+    if (type === 'radio' || type === 'checkbox') {
+      newField.options = [
+        { label: '选项 1', value: 'option1' },
+        { label: '选项 2', value: 'option2' },
+      ];
+    }
     onChange([...fields, newField]);
     setSelectedFieldId(newField.id);
   };
@@ -58,7 +71,62 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
     onChange(newFields);
   };
 
+  const updateSelectedFieldOption = (index: number, key: 'label' | 'value', val: string) => {
+    if (!selectedFieldId) return;
+    const newFields = fields.map(f => {
+      if (f.id === selectedFieldId && f.options) {
+        const newOptions = [...f.options];
+        newOptions[index] = { ...newOptions[index], [key]: val };
+        return { ...f, options: newOptions };
+      }
+      return f;
+    });
+    onChange(newFields);
+  };
+
+  const addSelectedFieldOption = () => {
+    if (!selectedFieldId) return;
+    const newFields = fields.map(f => {
+      if (f.id === selectedFieldId) {
+        const currentOptions = f.options || [];
+        const newOption = { label: `选项 ${currentOptions.length + 1}`, value: `option${currentOptions.length + 1}` };
+        return { ...f, options: [...currentOptions, newOption] };
+      }
+      return f;
+    });
+    onChange(newFields);
+  };
+
+  const removeSelectedFieldOption = (index: number) => {
+    if (!selectedFieldId) return;
+    const newFields = fields.map(f => {
+      if (f.id === selectedFieldId && f.options) {
+        const newOptions = [...f.options];
+        newOptions.splice(index, 1);
+        return { ...f, options: newOptions };
+      }
+      return f;
+    });
+    onChange(newFields);
+  };
+
+  const updateVisibleCondition = (key: 'dependentFieldId' | 'operator' | 'value', val: string) => {
+    if (!selectedFieldId) return;
+    const newFields = fields.map(f => {
+      if (f.id === selectedFieldId) {
+        const currentCondition = f.visibleCondition || { dependentFieldId: '', operator: '===', value: '' };
+        return {
+          ...f,
+          visibleCondition: { ...currentCondition, [key]: val }
+        };
+      }
+      return f;
+    });
+    onChange(newFields);
+  };
+
   const selectedField = fields.find(f => f.id === selectedFieldId);
+  const otherFields = fields.filter(f => f.id !== selectedFieldId);
 
   return (
     <div className="flex h-full w-full flex-1 overflow-hidden bg-gray-50">
@@ -109,7 +177,16 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                       {field.name} {field.required && <span className="text-red-500">*</span>}
                       {field.unit && <span className="text-gray-500 text-xs ml-1">({field.unit})</span>}
                     </label>
+                    {field.visibleCondition?.dependentFieldId && (
+                      <span title="配置了显示条件">
+                        <Eye className="w-4 h-4 text-indigo-500" />
+                      </span>
+                    )}
                   </div>
+                  
+                  {field.description && (
+                    <p className="text-xs text-gray-500 mb-2">{field.description}</p>
+                  )}
                   
                   <div className="pointer-events-none">
                     {field.type === 'textarea' ? (
@@ -122,25 +199,21 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                       />
                     ) : field.type === 'radio' ? (
                       <div className="space-y-2">
-                        <div className="flex items-center">
-                          <input type="radio" disabled className="h-4 w-4 text-indigo-600 border-gray-300" />
-                          <label className="ml-2 block text-sm text-gray-500">选项 1</label>
-                        </div>
-                        <div className="flex items-center">
-                          <input type="radio" disabled className="h-4 w-4 text-indigo-600 border-gray-300" />
-                          <label className="ml-2 block text-sm text-gray-500">选项 2</label>
-                        </div>
+                        {field.options?.map((opt, idx) => (
+                          <div key={idx} className="flex items-center">
+                            <input type="radio" disabled className="h-4 w-4 text-indigo-600 border-gray-300" />
+                            <label className="ml-2 block text-sm text-gray-500">{opt.label}</label>
+                          </div>
+                        ))}
                       </div>
                     ) : field.type === 'checkbox' ? (
                       <div className="space-y-2">
-                        <div className="flex items-center">
-                          <input type="checkbox" disabled className="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
-                          <label className="ml-2 block text-sm text-gray-500">选项 1</label>
-                        </div>
-                        <div className="flex items-center">
-                          <input type="checkbox" disabled className="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
-                          <label className="ml-2 block text-sm text-gray-500">选项 2</label>
-                        </div>
+                        {field.options?.map((opt, idx) => (
+                          <div key={idx} className="flex items-center">
+                            <input type="checkbox" disabled className="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+                            <label className="ml-2 block text-sm text-gray-500">{opt.label}</label>
+                          </div>
+                        ))}
                       </div>
                     ) : field.type === 'dateRange' ? (
                       <div className="flex items-center space-x-2">
@@ -214,79 +287,196 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
               请在画布中选择字段
             </div>
           ) : (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">字段名称</label>
-                <input
-                  type="text"
-                  value={selectedField.name}
-                  onChange={(e) => updateSelectedField('name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">字段类型</label>
-                <select
-                  value={selectedField.type}
-                  onChange={(e) => updateSelectedField('type', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                >
-                  {FIELD_TYPES.map(t => (
-                    <option key={t.type} value={t.type}>{t.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex items-center pt-2">
-                <input
-                  type="checkbox"
-                  id="required-checkbox"
-                  checked={selectedField.required}
-                  onChange={(e) => updateSelectedField('required', e.target.checked)}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label htmlFor="required-checkbox" className="ml-2 block text-sm text-gray-700">
-                  必填项
-                </label>
-              </div>
-
-              <div className="pt-4 border-t border-gray-100 mt-4 space-y-4">
-                <h4 className="text-sm font-medium text-gray-900">高级配置</h4>
+            <div className="space-y-6">
+              
+              {/* 基础属性 */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-2">基础属性</h4>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">提示语 (Placeholder)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">字段名称</label>
                   <input
                     type="text"
-                    value={selectedField.placeholder || ''}
-                    onChange={(e) => updateSelectedField('placeholder', e.target.value)}
-                    placeholder="输入提示语"
+                    value={selectedField.name}
+                    onChange={(e) => updateSelectedField('name', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">默认值 (Default Value)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">标识符 (ID)</label>
                   <input
                     type="text"
-                    value={selectedField.defaultValue || ''}
-                    onChange={(e) => updateSelectedField('defaultValue', e.target.value)}
-                    placeholder="输入默认值"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    value={selectedField.id}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 sm:text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">单位 (Unit)</label>
-                  <input
-                    type="text"
-                    value={selectedField.unit || ''}
-                    onChange={(e) => updateSelectedField('unit', e.target.value)}
-                    placeholder="例如: 天、元"
+                  <label className="block text-sm font-medium text-gray-700 mb-1">字段类型</label>
+                  <select
+                    value={selectedField.type}
+                    onChange={(e) => updateSelectedField('type', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  >
+                    {FIELD_TYPES.map(t => (
+                      <option key={t.type} value={t.type}>{t.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-center pt-2">
+                  <input
+                    type="checkbox"
+                    id="required-checkbox"
+                    checked={selectedField.required}
+                    onChange={(e) => updateSelectedField('required', e.target.checked)}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="required-checkbox" className="ml-2 block text-sm text-gray-700">
+                    必填项
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">描述信息</label>
+                  <textarea
+                    value={selectedField.description || ''}
+                    onChange={(e) => updateSelectedField('description', e.target.value)}
+                    placeholder="输入字段描述"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    rows={2}
                   />
                 </div>
               </div>
+
+              {/* 专属属性 */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-2">专属属性</h4>
+                
+                {(selectedField.type === 'text' || selectedField.type === 'textarea' || selectedField.type === 'number' || selectedField.type === 'amount') && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">提示语 (Placeholder)</label>
+                      <input
+                        type="text"
+                        value={selectedField.placeholder || ''}
+                        onChange={(e) => updateSelectedField('placeholder', e.target.value)}
+                        placeholder="输入提示语"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">默认值 (Default Value)</label>
+                      <input
+                        type="text"
+                        value={selectedField.defaultValue || ''}
+                        onChange={(e) => updateSelectedField('defaultValue', e.target.value)}
+                        placeholder="输入默认值"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {(selectedField.type === 'number' || selectedField.type === 'amount') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">单位 (Unit)</label>
+                    <input
+                      type="text"
+                      value={selectedField.unit || ''}
+                      onChange={(e) => updateSelectedField('unit', e.target.value)}
+                      placeholder="例如: 天、元"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                )}
+
+                {(selectedField.type === 'radio' || selectedField.type === 'checkbox') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">选项列表</label>
+                    <div className="space-y-2">
+                      {selectedField.options?.map((opt, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={opt.label}
+                            onChange={(e) => updateSelectedFieldOption(idx, 'label', e.target.value)}
+                            placeholder="选项名"
+                            className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                          <input
+                            type="text"
+                            value={opt.value}
+                            onChange={(e) => updateSelectedFieldOption(idx, 'value', e.target.value)}
+                            placeholder="值"
+                            className="flex-1 min-w-0 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                          />
+                          <button
+                            onClick={() => removeSelectedFieldOption(idx)}
+                            className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={addSelectedFieldOption}
+                        className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                      >
+                        <Plus className="w-4 h-4" />
+                        添加选项
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 高级配置 */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-2">高级配置</h4>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">显示条件 (Visible Condition)</label>
+                  <div className="space-y-2 bg-gray-50 p-3 rounded-md border border-gray-200">
+                    <select
+                      value={selectedField.visibleCondition?.dependentFieldId || ''}
+                      onChange={(e) => updateVisibleCondition('dependentFieldId', e.target.value)}
+                      className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                      <option value="">无条件 (始终显示)</option>
+                      {otherFields.map(f => (
+                        <option key={f.id} value={f.id}>{f.name}</option>
+                      ))}
+                    </select>
+
+                    {selectedField.visibleCondition?.dependentFieldId && (
+                      <div className="flex gap-2">
+                        <select
+                          value={selectedField.visibleCondition.operator}
+                          onChange={(e) => updateVisibleCondition('operator', e.target.value)}
+                          className="w-1/3 px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                          <option value="===">等于</option>
+                          <option value="!==">不等于</option>
+                          <option value=">">大于</option>
+                          <option value="<">小于</option>
+                          <option value="includes">包含</option>
+                        </select>
+                        <input
+                          type="text"
+                          value={selectedField.visibleCondition.value}
+                          onChange={(e) => updateVisibleCondition('value', e.target.value)}
+                          placeholder="条件值"
+                          className="flex-1 px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
         </div>

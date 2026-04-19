@@ -55,6 +55,9 @@ export function AppLayout() {
           <NavLink className={({ isActive }) => (isActive ? "navItem active" : "navItem")} to="/compare">
             对比
           </NavLink>
+          <NavLink className={({ isActive }) => (isActive ? "navItem active" : "navItem")} to="/work-orders">
+            工单管理
+          </NavLink>
         </aside>
         <main className="content">
           <Outlet />

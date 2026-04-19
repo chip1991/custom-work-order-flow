@@ -29,6 +29,8 @@ import { ProjectFormPage } from "./pages/projects/ProjectFormPage";
 import { ProjectsListPage } from "./pages/projects/ProjectsListPage";
 import { RunDetailPage } from "./pages/runs/RunDetailPage";
 import { RunsListPage } from "./pages/runs/RunsListPage";
+import WorkOrdersPage from "./pages/WorkOrders";
+import WorkOrderFlowEditor from "./pages/WorkOrders/WorkOrderFlowEditor";
 
 export default function App() {
   return (
@@ -82,6 +84,11 @@ export default function App() {
 
             <Route path="runs" element={<RunsListPage />} />
             <Route path="runs/:runId" element={<RunDetailPage />} />
+
+            <Route path="work-orders" element={<WorkOrdersPage />} />
+            <Route path="work-orders/new" element={<WorkOrderFlowEditor />} />
+            <Route path="work-orders/:id" element={<WorkOrderFlowEditor />} />
+            <Route path="work-orders/:id/edit" element={<WorkOrderFlowEditor />} />
 
             <Route path="compare" element={<ComparePage />} />
             <Route path="*" element={<NotFoundPage />} />

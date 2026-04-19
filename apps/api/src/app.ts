@@ -13,6 +13,7 @@ import { projectsRouter } from "./routes/projects";
 import { promptTemplatesRouter } from "./routes/promptTemplates";
 import { samplesRouter } from "./routes/samples";
 import { runsRouter } from "./routes/runs";
+import { workOrdersRouter } from "./routes/workOrders";
 
 export function createApp() {
   const app = express();
@@ -63,6 +64,7 @@ export function createApp() {
   app.use(metricsRouter);
   app.use(evaluationPlansRouter);
   app.use(runsRouter);
+  app.use("/work-orders", workOrdersRouter);
 
   app.use(errorMiddleware);
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, AlignLeft, FileText, Hash, Calendar, Paperclip, DollarSign, CircleDot, CheckSquare, CalendarRange, LayoutGrid, SlidersHorizontal, Eye, Plus, X } from 'lucide-react';
+import { Trash2, AlignLeft, FileText, Hash, Calendar, Paperclip, DollarSign, CircleDot, CheckSquare, CalendarRange, LayoutGrid, SlidersHorizontal, Eye, Plus, X, Settings } from 'lucide-react';
 
 export interface FormField {
   id: string;
@@ -37,6 +37,7 @@ const FIELD_TYPES = [
 
 export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'attributes' | 'settings'>('attributes');
 
   const addField = (type: string, label: string) => {
     const newField: FormField = {
@@ -276,9 +277,27 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
       {/* 右侧：属性配置 */}
       <aside className="w-80 border-l border-gray-200 bg-white flex flex-col h-full z-10 shadow-sm">
         <div className="flex border-b border-gray-200 bg-gray-50 flex-shrink-0">
-          <button className="flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 border-b-2 border-indigo-600 text-indigo-600 bg-white">
+          <button
+            onClick={() => setActiveTab('attributes')}
+            className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 border-b-2 transition-colors ${
+              activeTab === 'attributes'
+                ? 'border-indigo-600 text-indigo-600 bg-white'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            }`}
+          >
             <SlidersHorizontal className="w-4 h-4" />
             字段属性
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 border-b-2 transition-colors ${
+              activeTab === 'settings'
+                ? 'border-indigo-600 text-indigo-600 bg-white'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            高级配置
           </button>
         </div>
         <div className="p-4 overflow-y-auto flex-1">
@@ -289,9 +308,11 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
           ) : (
             <div className="space-y-6">
               
-              {/* 基础属性 */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-2">基础属性</h4>
+              {activeTab === 'attributes' && (
+                <>
+                  {/* 基础属性 */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-2">基础属性</h4>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">字段名称</label>
@@ -432,9 +453,12 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                   </div>
                 )}
               </div>
+              </>
+            )}
 
-              {/* 高级配置 */}
+            {activeTab === 'settings' && (
               <div className="space-y-4">
+                {/* 高级配置 */}
                 <h4 className="text-sm font-medium text-gray-900 border-b border-gray-100 pb-2">高级配置</h4>
                 
                 <div>
@@ -476,6 +500,7 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                   </div>
                 </div>
               </div>
+            )}
 
             </div>
           )}

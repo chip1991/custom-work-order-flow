@@ -14,7 +14,7 @@ type TabType = 'basic' | 'form' | 'node';
 export default function ProcessEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isNew = id === 'new';
+  const isNew = !id || id === 'new';
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

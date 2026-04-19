@@ -1,4 +1,4 @@
-import { FileText, CheckCircle, Briefcase, Flag, Inbox, Star, PhoneCall, AlertTriangle } from 'lucide-react';
+import { FileText, CheckCircle, Briefcase, Flag, Inbox, Star, PhoneCall, AlertTriangle, GitMerge } from 'lucide-react';
 
 export default function Sidebar() {
   const onDragStart = (event: React.DragEvent, nodeType: string, label: string) => {
@@ -11,6 +11,7 @@ export default function Sidebar() {
     { type: 'startNode', label: '开始节点', icon: <Flag className="w-5 h-5 text-green-500" />, desc: '流程的起点' },
     { type: 'acceptNode', label: '受理节点', icon: <Inbox className="w-5 h-5 text-indigo-500" />, desc: '接收并受理业务' },
     { type: 'taskNode', label: '处理节点', icon: <Briefcase className="w-5 h-5 text-orange-500" />, desc: '具体处理任务' },
+    { type: 'condition', label: '条件判断', icon: <GitMerge className="w-5 h-5 text-orange-500" />, desc: '根据条件走向不同分支' },
     { type: 'approvalNode', label: '审批节点', icon: <CheckCircle className="w-5 h-5 text-blue-500" />, desc: '需要人员审批' },
     { type: 'evaluateNode', label: '评价节点', icon: <Star className="w-5 h-5 text-yellow-500" />, desc: '用户对服务进行评价' },
     { type: 'callbackNode', label: '回访节点', icon: <PhoneCall className="w-5 h-5 text-teal-500" />, desc: '对用户进行回访' },

@@ -75,6 +75,47 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData }: Prop
               />
             </div>
           )}
+
+          {type === 'condition' && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">判断字段</label>
+                <input
+                  type="text"
+                  value={((data.conditionConfig as any)?.field) || ''}
+                  onChange={(e) => onUpdateNodeData(id, { conditionConfig: { ...(data.conditionConfig as any), field: e.target.value } })}
+                  placeholder="例如: 工单类型"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">判断条件</label>
+                <select
+                  value={((data.conditionConfig as any)?.operator) || '='}
+                  onChange={(e) => onUpdateNodeData(id, { conditionConfig: { ...(data.conditionConfig as any), operator: e.target.value } })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                >
+                  <option value="=">等于 (=)</option>
+                  <option value="!=">不等于 (!=)</option>
+                  <option value=">">大于 (&gt;)</option>
+                  <option value="<">小于 (&lt;)</option>
+                  <option value=">=">大于等于 (&gt;=)</option>
+                  <option value="<=">小于等于 (&lt;=)</option>
+                  <option value="contains">包含</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">比较值</label>
+                <input
+                  type="text"
+                  value={((data.conditionConfig as any)?.value) || ''}
+                  onChange={(e) => onUpdateNodeData(id, { conditionConfig: { ...(data.conditionConfig as any), value: e.target.value } })}
+                  placeholder="例如: 维修"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

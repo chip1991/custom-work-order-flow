@@ -6,6 +6,7 @@ import AcceptNode from './AcceptNode';
 import EvaluateNode from './EvaluateNode';
 import CallbackNode from './CallbackNode';
 import EscalateNode from './EscalateNode';
+import ConditionNode from './ConditionNode';
 
 export const nodeTypes = {
   startNode: StartNode,
@@ -16,4 +17,5 @@ export const nodeTypes = {
   evaluateNode: EvaluateNode,
   callbackNode: CallbackNode,
   escalateNode: EscalateNode,
+  condition: ConditionNode,
 };

@@ -9,8 +9,8 @@ export function LoginPage() {
   const navigate = useNavigate();
   const next = useMemo(() => params.get("next") ?? "/", [params]);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@example.com");
+  const [password, setPassword] = useState("admin123456");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
 

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, ArrowLeft, Edit2, Play, SlidersHorizontal, AlertCircle } from 'lucide-react';
+import { Save, ArrowLeft, Edit2, Play, SlidersHorizontal, AlertCircle, Shield } from 'lucide-react';
 import { ReactFlowProvider, Node, Edge } from '@xyflow/react';
 
 import Sidebar from './components/Sidebar';
@@ -21,6 +21,7 @@ export default function ProcessEditor() {
   const [loading, setLoading] = useState(!isNew);
 
   const [activeTab, setActiveTab] = useState<TabType>('node');
+  const [activeRightTab, setActiveRightTab] = useState<'properties' | 'permissions'>('properties');
 
   const [processData, setProcessData] = useState({
     name: '新建流程',
@@ -193,9 +194,27 @@ export default function ProcessEditor() {
 
         <aside className="w-80 border-l border-gray-200 bg-white flex flex-col h-full z-10 shadow-sm">
           <div className="flex border-b border-gray-200 bg-gray-50 flex-shrink-0">
-            <button className="flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 border-b-2 border-indigo-600 text-indigo-600 bg-white">
+            <button
+              onClick={() => setActiveRightTab('properties')}
+              className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 ${
+                activeRightTab === 'properties'
+                  ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+              }`}
+            >
               <SlidersHorizontal className="w-4 h-4" />
               节点属性
+            </button>
+            <button
+              onClick={() => setActiveRightTab('permissions')}
+              className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 ${
+                activeRightTab === 'permissions'
+                  ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <Shield className="w-4 h-4" />
+              表单权限
             </button>
           </div>
 
@@ -205,6 +224,7 @@ export default function ProcessEditor() {
                 selectedNode={selectedNode}
                 onUpdateNodeData={updateNodeData}
                 formConfig={formConfig}
+                activeTab={activeRightTab}
               />
             </div>
           </div>

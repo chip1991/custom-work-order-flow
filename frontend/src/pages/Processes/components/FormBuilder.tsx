@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, AlignLeft, FileText, Hash, Calendar, Paperclip, DollarSign, CircleDot, CheckSquare, CalendarRange } from 'lucide-react';
+import { Trash2, AlignLeft, FileText, Hash, Calendar, Paperclip, DollarSign, CircleDot, CheckSquare, CalendarRange, LayoutGrid, SlidersHorizontal } from 'lucide-react';
 
 export interface FormField {
   id: string;
@@ -61,11 +61,14 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
   const selectedField = fields.find(f => f.id === selectedFieldId);
 
   return (
-    <div className="flex h-[600px] border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+    <div className="flex h-full w-full flex-1 overflow-hidden bg-gray-50">
       {/* 左侧：控件库 */}
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200 bg-gray-50/50">
-          <h3 className="text-sm font-medium text-gray-900">控件库</h3>
+      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-full z-10">
+        <div className="p-4 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <LayoutGrid className="w-4 h-4" />
+            控件库
+          </h2>
         </div>
         <div className="p-4 overflow-y-auto flex-1">
           <div className="grid grid-cols-2 gap-2">
@@ -81,14 +84,10 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
             ))}
           </div>
         </div>
-      </div>
+      </aside>
 
       {/* 中间：预览画布 */}
-      <div className="flex-1 flex flex-col">
-        <div className="p-4 border-b border-gray-200 bg-white">
-          <h3 className="text-sm font-medium text-gray-900">表单预览</h3>
-        </div>
-        <div className="p-6 overflow-y-auto flex-1">
+      <main className="flex-1 relative bg-gray-50 overflow-y-auto p-6">
           {fields.length === 0 ? (
             <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
               请从左侧拖拽或点击添加字段
@@ -199,13 +198,15 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </main>
 
       {/* 右侧：属性配置 */}
-      <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200 bg-gray-50/50">
-          <h3 className="text-sm font-medium text-gray-900">字段属性</h3>
+      <aside className="w-80 border-l border-gray-200 bg-white flex flex-col h-full z-10 shadow-sm">
+        <div className="flex border-b border-gray-200 bg-gray-50 flex-shrink-0">
+          <button className="flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 border-b-2 border-indigo-600 text-indigo-600 bg-white">
+            <SlidersHorizontal className="w-4 h-4" />
+            字段属性
+          </button>
         </div>
         <div className="p-4 overflow-y-auto flex-1">
           {!selectedField ? (
@@ -289,7 +290,7 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
             </div>
           )}
         </div>
-      </div>
+      </aside>
     </div>
   );
 }

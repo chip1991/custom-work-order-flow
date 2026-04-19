@@ -214,10 +214,8 @@ export default function ProcessEditor() {
       )}
 
       {activeTab === 'form' && (
-        <div className="flex-1 overflow-auto p-6 bg-gray-50">
-          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8 border border-gray-200 min-h-[600px]">
-            <FormBuilder fields={formConfig} onChange={setFormConfig} />
-          </div>
+        <div className="flex-1 overflow-hidden flex bg-gray-50">
+          <FormBuilder fields={formConfig} onChange={setFormConfig} />
         </div>
       )}
     </div>

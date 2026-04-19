@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, AlignLeft, FileText, Hash, Calendar, List, User, Users, Paperclip } from 'lucide-react';
+import { Trash2, AlignLeft, FileText, Hash, Calendar, Paperclip, DollarSign, CircleDot, CheckSquare, CalendarRange } from 'lucide-react';
 
 export interface FormField {
   id: string;
@@ -20,10 +20,11 @@ const FIELD_TYPES = [
   { type: 'text', label: '单行文本', icon: AlignLeft },
   { type: 'textarea', label: '多行文本', icon: FileText },
   { type: 'number', label: '数字', icon: Hash },
+  { type: 'amount', label: '金额', icon: DollarSign },
+  { type: 'radio', label: '单选', icon: CircleDot },
+  { type: 'checkbox', label: '多选', icon: CheckSquare },
   { type: 'date', label: '日期', icon: Calendar },
-  { type: 'select', label: '下拉选择', icon: List },
-  { type: 'user', label: '人员', icon: User },
-  { type: 'department', label: '部门', icon: Users },
+  { type: 'dateRange', label: '日期区间', icon: CalendarRange },
   { type: 'attachment', label: '附件', icon: Paperclip },
 ];
 
@@ -120,13 +121,63 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                         rows={3}
                         value={field.defaultValue || ''}
                       />
-                    ) : field.type === 'select' ? (
-                      <select disabled className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 sm:text-sm">
-                        <option>{field.placeholder || '请选择'}</option>
-                      </select>
+                    ) : field.type === 'radio' ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center">
+                          <input type="radio" disabled className="h-4 w-4 text-indigo-600 border-gray-300" />
+                          <label className="ml-2 block text-sm text-gray-500">选项 1</label>
+                        </div>
+                        <div className="flex items-center">
+                          <input type="radio" disabled className="h-4 w-4 text-indigo-600 border-gray-300" />
+                          <label className="ml-2 block text-sm text-gray-500">选项 2</label>
+                        </div>
+                      </div>
+                    ) : field.type === 'checkbox' ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center">
+                          <input type="checkbox" disabled className="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+                          <label className="ml-2 block text-sm text-gray-500">选项 1</label>
+                        </div>
+                        <div className="flex items-center">
+                          <input type="checkbox" disabled className="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+                          <label className="ml-2 block text-sm text-gray-500">选项 2</label>
+                        </div>
+                      </div>
+                    ) : field.type === 'dateRange' ? (
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="date"
+                          disabled
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 sm:text-sm"
+                        />
+                        <span className="text-gray-500">-</span>
+                        <input
+                          type="date"
+                          disabled
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 sm:text-sm"
+                        />
+                      </div>
+                    ) : field.type === 'attachment' ? (
+                      <div className="w-full px-3 py-4 border-2 border-dashed border-gray-300 rounded-md bg-gray-50 flex flex-col items-center justify-center text-gray-500 sm:text-sm">
+                        <Paperclip className="w-5 h-5 mb-1 text-gray-400" />
+                        <span>点击或拖拽上传附件</span>
+                      </div>
+                    ) : field.type === 'amount' ? (
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <span className="text-gray-500 sm:text-sm">¥</span>
+                        </div>
+                        <input
+                          type="number"
+                          disabled
+                          placeholder={field.placeholder || `请输入${field.name}`}
+                          value={field.defaultValue || ''}
+                          className="w-full pl-7 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 sm:text-sm"
+                        />
+                      </div>
                     ) : (
                       <input
-                        type={field.type === 'number' ? 'number' : 'text'}
+                        type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
                         disabled
                         placeholder={field.placeholder || `请输入${field.name}`}
                         value={field.defaultValue || ''}

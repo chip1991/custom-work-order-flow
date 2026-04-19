@@ -1,0 +1,10 @@
+- [x] 根目录 `npm run build` 可成功构建前端与后端产物
+- [x] 未登录访问受保护页面会跳转登录；API 返回 401
+- [x] 登录后可完成 Project 的新增/查询/编辑/删除（真实数据库持久化）
+- [x] 可配置 Model 与 ModelVersion，并可通过健康检查验证 endpoint 可调用
+- [x] 可创建 Dataset 并通过 JSONL 导入 Sample；导入失败可定位错误行且不写入脏数据
+- [x] 可创建 PromptTemplate、Metric、EvaluationPlan，并在计划详情触发运行
+- [x] EvaluationRun 从 QUEUED→RUNNING→SUCCEEDED/FAILED 状态流转正确，错误可追踪
+- [x] RunCase 真实包含 renderedPrompt、modelOutput、latency/cost（如可获取）与指标结果
+- [x] 运行详情支持案例列表分页与筛选（按关键词、errorType、指标范围）
+- [x] 对比页可选择两个运行，展示指标差值并可定位差异案例

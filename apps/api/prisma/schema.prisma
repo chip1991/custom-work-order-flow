@@ -1,0 +1,334 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum EvaluationPlanSampleMode {
+  ALL
+  RANDOM_N
+}
+
+enum EvaluationRunStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+enum RunCaseStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+enum RunCaseErrorType {
+  NONE
+  TIMEOUT
+  RATE_LIMIT
+  MODEL_ERROR
+  PARSER_ERROR
+  UNKNOWN
+}
+
+model User {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  passwordHash String
+  role         UserRole    @default(USER)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  projects     Project[]
+  apiKeys      ApiKey[]
+  runs         EvaluationRun[]
+  sessions     Session[]
+
+  @@index([role])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  models            Model[]
+  datasets          Dataset[]
+  promptTemplates   PromptTemplate[]
+  metrics           Metric[]
+  evaluationPlans   EvaluationPlan[]
+  apiKeys           ApiKey[]
+
+  @@unique([ownerId, name])
+  @@index([ownerId])
+}
+
+model Model {
+  id          String   @id @default(uuid())
+  name        String
+  provider    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  versions    ModelVersion[]
+
+  @@unique([projectId, name])
+  @@index([projectId])
+}
+
+model ModelVersion {
+  id          String   @id @default(uuid())
+  name        String
+  baseUrl     String?
+  config      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  modelId     String
+  model       Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  evaluationPlans EvaluationPlan[]
+
+  @@unique([modelId, name])
+  @@index([modelId])
+}
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  name        String
+  prefix      String
+  keyHash     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastUsedAt  DateTime?
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([projectId])
+}
+
+model Dataset {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  samples     Sample[]
+  evaluationPlans EvaluationPlan[]
+
+  @@unique([projectId, name])
+  @@index([projectId])
+}
+
+model Sample {
+  id        String   @id @default(uuid())
+  input     Json
+  context   Json?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  datasetId String
+  dataset   Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  runCases  RunCase[]
+
+  @@index([datasetId])
+}
+
+model PromptTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  template    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  evaluationPlans EvaluationPlan[]
+
+  @@unique([projectId, name])
+  @@index([projectId])
+}
+
+model Metric {
+  id          String   @id @default(uuid())
+  name        String
+  kind        String
+  config      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  evaluationPlanMetrics EvaluationPlanMetric[]
+  metricResults         MetricResult[]
+
+  @@unique([projectId, name])
+  @@index([projectId])
+}
+
+model EvaluationPlan {
+  id          String                 @id @default(uuid())
+  name        String
+  sampleMode  EvaluationPlanSampleMode @default(ALL)
+  sampleCount Int?
+  config      Json?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  projectId   String
+  project     Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  modelVersionId String
+  modelVersion   ModelVersion        @relation(fields: [modelVersionId], references: [id], onDelete: Restrict)
+
+  datasetId   String
+  dataset     Dataset                @relation(fields: [datasetId], references: [id], onDelete: Restrict)
+
+  promptTemplateId String
+  promptTemplate   PromptTemplate    @relation(fields: [promptTemplateId], references: [id], onDelete: Restrict)
+
+  runs        EvaluationRun[]
+  metrics     EvaluationPlanMetric[]
+
+  @@unique([projectId, name])
+  @@index([projectId])
+  @@index([modelVersionId])
+  @@index([datasetId])
+  @@index([promptTemplateId])
+}
+
+model EvaluationRun {
+  id        String             @id @default(uuid())
+  status    EvaluationRunStatus @default(QUEUED)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  startedAt DateTime?
+  finishedAt DateTime?
+  errorMessage String?
+  planSnapshot Json?
+
+  planId    String
+  plan      EvaluationPlan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User             @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  cases     RunCase[]
+
+  @@index([planId])
+  @@index([createdById])
+  @@index([status])
+}
+
+model RunCase {
+  id        String        @id @default(uuid())
+  status    RunCaseStatus @default(QUEUED)
+  errorType RunCaseErrorType @default(NONE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  startedAt DateTime?
+  finishedAt DateTime?
+  latencyMs Int?
+  promptTokens Int?
+  completionTokens Int?
+  totalTokens Int?
+  costUsd   Float?
+  renderedPrompt String?
+  modelOutput    String?
+  errorMessage   String?
+
+  runId     String
+  run       EvaluationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  sampleId  String
+  sample    Sample        @relation(fields: [sampleId], references: [id], onDelete: Restrict)
+
+  metricResults MetricResult[]
+
+  @@unique([runId, sampleId])
+  @@index([runId])
+  @@index([sampleId])
+  @@index([status])
+  @@index([errorType])
+}
+
+model MetricResult {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  metricId   String
+  metric     Metric   @relation(fields: [metricId], references: [id], onDelete: Restrict)
+
+  runCaseId  String
+  runCase    RunCase  @relation(fields: [runCaseId], references: [id], onDelete: Cascade)
+
+  score      Float?
+  valueFloat Float?
+  valueText  String?
+  valueJson  Json?
+
+  @@unique([metricId, runCaseId])
+  @@index([metricId])
+  @@index([runCaseId])
+}
+
+model EvaluationPlanMetric {
+  planId   String
+  plan     EvaluationPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  metricId String
+  metric   Metric         @relation(fields: [metricId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([planId, metricId])
+  @@index([metricId])
+}

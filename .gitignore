@@ -1,0 +1,13 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage
+.vite
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+apps/api/prisma/*.db-wal
+apps/api/prisma/*.db-shm
+apps/api/prisma/.data/

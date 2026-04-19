@@ -1,0 +1,5 @@
+- [x] The Properties Panel allows toggling between "表单模式" (Form Mode) and "URI Mode" for the Database Node.
+- [x] In Form Mode, inputs are provided for Host, Port, Username, Password, and Database Name.
+- [x] In URI Mode, the original Connection String input is provided.
+- [x] The DAG Engine `executeDatabase` adapter correctly handles both `configMode === 'form'` and `configMode === 'uri'` or undefined.
+- [x] The `executeDatabase` adapter safely escapes the username and password using URL encoding before attempting connection in Form Mode.

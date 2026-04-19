@@ -1,0 +1,5 @@
+- [x] Backend DAG Engine uses an in-degree based queue for concurrent execution of independent nodes.
+- [x] Backend LLM Node executor successfully makes an API call to OpenAI (or similar) with substituted variables.
+- [x] Backend LLM Node streams response chunks via SSE to the frontend Playground.
+- [x] Frontend Properties Panel provides a dropdown or popover to visually select upstream node outputs instead of typing them manually.
+- [x] Visual variable selection properly inserts the `{{node_id.output}}` format to remain compatible with backend substitution.

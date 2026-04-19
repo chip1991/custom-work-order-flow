@@ -1,0 +1,32 @@
+{
+  "name": "llm-eval-platform",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "API_PORT=$(node scripts/pick-api-port.mjs) && concurrently -n api,web -c green,blue \"API_PORT=$API_PORT npm -w apps/api run dev\" \"API_PORT=$API_PORT npm -w apps/web run dev\"",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:init": "node -e \"require('fs').mkdirSync('apps/api/prisma/.data',{recursive:true})\" && npm run db:generate && npm run db:migrate && npm run db:seed",
+    "build": "npm --workspaces run build",
+    "lint": "npm --workspaces run lint",
+    "test": "npm --workspaces run test",
+    "db:generate": "npx prisma generate --schema apps/api/prisma/schema.prisma",
+    "db:migrate": "npx prisma migrate deploy --schema apps/api/prisma/schema.prisma",
+    "db:migrate:dev": "npx prisma migrate dev --schema apps/api/prisma/schema.prisma",
+    "db:seed": "tsx apps/api/prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.18",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.5.3",
+    "typescript-eslint": "^8.32.0",
+    "typescript": "^5.8.3"
+  }
+}

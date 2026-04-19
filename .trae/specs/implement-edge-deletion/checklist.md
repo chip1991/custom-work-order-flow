@@ -1,0 +1,4 @@
+- [x] The Canvas allows users to delete selected edges by pressing the Backspace or Delete key.
+- [x] A custom edge is rendered instead of the default edge for all connections.
+- [x] A small trash/delete icon appears at the midpoint of an edge when it is hovered over.
+- [x] Clicking the trash icon successfully removes the corresponding edge from the canvas.

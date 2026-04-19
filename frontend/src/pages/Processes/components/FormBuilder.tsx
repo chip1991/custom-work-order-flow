@@ -341,19 +341,6 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">字段类型</label>
-                  <select
-                    value={selectedField.type}
-                    onChange={(e) => updateSelectedField('type', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  >
-                    {FIELD_TYPES.map(t => (
-                      <option key={t.type} value={t.type}>{t.label}</option>
-                    ))}
-                  </select>
-                </div>
-
                 <div className="flex items-center pt-2">
                   <input
                     type="checkbox"
@@ -365,17 +352,6 @@ export default function FormBuilder({ fields, onChange }: FormBuilderProps) {
                   <label htmlFor="required-checkbox" className="ml-2 block text-sm text-gray-700">
                     必填项
                   </label>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">描述信息</label>
-                  <textarea
-                    value={selectedField.description || ''}
-                    onChange={(e) => updateSelectedField('description', e.target.value)}
-                    placeholder="输入字段描述"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    rows={2}
-                  />
                 </div>
               </div>
 

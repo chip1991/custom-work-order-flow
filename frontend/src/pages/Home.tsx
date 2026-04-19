@@ -8,9 +8,9 @@ export default function Home() {
   const [loginMethod, setLoginMethod] = useState<"phone" | "email">("email");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [agreed, setAgreed] = useState(false);
+  const [identifier, setIdentifier] = useState("admin");
+  const [password, setPassword] = useState("admin123");
+  const [agreed, setAgreed] = useState(true);
   const [error, setError] = useState("");
 
   const isPhoneValid = phone.length > 0 && code.length > 0 && agreed;

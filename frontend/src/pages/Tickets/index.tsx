@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { Loader2, Search, Ticket, ArrowRight } from "lucide-react";
-import { getTickets, Ticket as TicketType } from "@/api/tickets";
+import { Loader2, Search, Ticket, ArrowRight, Download, PauseCircle, CheckCircle2 } from "lucide-react";
+import { batchUpdateTicketStatus, getTickets, Ticket as TicketType } from "@/api/tickets";
 
 const STATUS_OPTIONS = [
   { value: "", label: "全部状态" },
@@ -21,6 +21,8 @@ export default function Tickets() {
   const [q, setQ] = useState(qFromUrl);
   const [tickets, setTickets] = useState<TicketType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [batching, setBatching] = useState(false);
 
   useEffect(() => {
     setStatus(statusFromUrl);
@@ -32,6 +34,7 @@ export default function Tickets() {
       setLoading(true);
       const data = await getTickets(params);
       setTickets(data);
+      setSelectedIds([]);
     } catch (error) {
       console.error("Failed to load tickets:", error);
     } finally {
@@ -46,6 +49,54 @@ export default function Tickets() {
   const filteredTickets = useMemo(() => {
     return tickets;
   }, [tickets]);
+
+  const allSelected = useMemo(() => {
+    if (filteredTickets.length === 0) return false;
+    return filteredTickets.every((t) => selectedIds.includes(t.id));
+  }, [filteredTickets, selectedIds]);
+
+  const exportSelectedCsv = () => {
+    const rows = filteredTickets.filter((t) => selectedIds.includes(t.id));
+    if (rows.length === 0) return;
+
+    const header = ["工单号", "标题", "服务", "状态", "处理人", "创建时间", "更新时间"];
+    const lines = rows.map((t) => [
+      t.ticketNo,
+      t.title,
+      t.service?.name || t.serviceId,
+      t.status,
+      t.assignee?.account || "",
+      t.createdAt ? dayjs(t.createdAt).format("YYYY-MM-DD HH:mm:ss") : "",
+      t.updatedAt ? dayjs(t.updatedAt).format("YYYY-MM-DD HH:mm:ss") : "",
+    ]);
+    const csv = [header, ...lines]
+      .map((cols) => cols.map((c) => `"${String(c ?? "").replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `tickets-${dayjs().format("YYYYMMDD-HHmmss")}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleBatchStatus = async (nextStatus: "open" | "closed" | "on_hold") => {
+    if (selectedIds.length === 0) return;
+    try {
+      setBatching(true);
+      await batchUpdateTicketStatus(selectedIds, nextStatus);
+      await loadTickets({ status: statusFromUrl || undefined, q: qFromUrl || undefined });
+    } catch (error: any) {
+      console.error("Failed to batch update tickets:", error);
+      alert(error?.message || "批量操作失败");
+    } finally {
+      setBatching(false);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col space-y-6">
@@ -101,12 +152,60 @@ export default function Tickets() {
               查询
             </button>
           </div>
+
+          {selectedIds.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 justify-end">
+              <div className="text-sm text-gray-600">已选 {selectedIds.length} 条</div>
+              <button
+                disabled={batching}
+                onClick={() => handleBatchStatus("on_hold")}
+                className="inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <PauseCircle className="w-4 h-4 mr-2" />
+                批量挂起
+              </button>
+              <button
+                disabled={batching}
+                onClick={() => handleBatchStatus("open")}
+                className="inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                批量恢复
+              </button>
+              <button
+                disabled={batching}
+                onClick={() => handleBatchStatus("closed")}
+                className="inline-flex items-center justify-center px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                批量关闭
+              </button>
+              <button
+                onClick={exportSelectedCsv}
+                className="inline-flex items-center justify-center px-3 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                导出CSV
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-x-auto bg-gray-50/30">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedIds(filteredTickets.map((t) => t.id));
+                      else setSelectedIds([]);
+                    }}
+                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   工单号
                 </th>
@@ -130,7 +229,7 @@ export default function Tickets() {
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center justify-center">
                       <Loader2 className="w-8 h-8 text-indigo-500 animate-spin mb-4" />
                       <p className="text-sm text-gray-500">加载中...</p>
@@ -144,6 +243,17 @@ export default function Tickets() {
                     className="hover:bg-gray-50 transition-colors cursor-pointer"
                     onClick={() => navigate(`/tickets/${t.id}`)}
                   >
+                    <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(t.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedIds([...selectedIds, t.id]);
+                          else setSelectedIds(selectedIds.filter((x) => x !== t.id));
+                        }}
+                        className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{t.ticketNo}</td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">{t.title}</div>
@@ -156,6 +266,10 @@ export default function Tickets() {
                       {t.status === "open" ? (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                           开放
+                        </span>
+                      ) : t.status === "on_hold" ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          挂起
                         </span>
                       ) : t.status === "closed" ? (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -188,7 +302,7 @@ export default function Tickets() {
 
               {!loading && filteredTickets.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">暂无工单</td>
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">暂无工单</td>
                 </tr>
               )}
             </tbody>

@@ -154,6 +154,38 @@ export const assignTicket = async (id: string, assigneeId: string): Promise<Tick
   return res.json();
 };
 
+export const updateTicketStatus = async (
+  id: string,
+  status: 'open' | 'closed' | 'on_hold' | 'canceled'
+): Promise<Ticket> => {
+  const res = await fetch(`/api/tickets/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to update ticket status');
+  }
+  return res.json();
+};
+
+export const batchUpdateTicketStatus = async (
+  ids: string[],
+  status: 'open' | 'closed' | 'on_hold' | 'canceled'
+): Promise<{ updated: number }> => {
+  const res = await fetch(`/api/tickets/batch/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids, status }),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to batch update ticket status');
+  }
+  return res.json();
+};
+
 export const getUsers = async (): Promise<{ id: string; account: string; email?: string }[]> => {
   const res = await fetch('/api/users');
   if (!res.ok) throw new Error('Failed to fetch users');

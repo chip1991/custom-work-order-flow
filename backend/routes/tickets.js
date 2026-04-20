@@ -244,6 +244,62 @@ router.get('/sla/status', async (req, res) => {
   }
 });
 
+// POST /api/tickets/batch/status
+router.post('/batch/status', async (req, res) => {
+  const { ids, status } = req.body || {};
+  const nextStatus = status ? String(status) : '';
+  const allowed = new Set(['open', 'closed', 'on_hold', 'canceled']);
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: 'ids is required' });
+  }
+  if (!allowed.has(nextStatus)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+
+  const authHeader = req.headers.authorization;
+  let currentUserId = null;
+  if (authHeader) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key_here');
+      currentUserId = decoded.id;
+    } catch (err) {}
+  }
+
+  try {
+    const now = new Date();
+    const result = await prisma.$transaction(async (tx) => {
+      const updated = await tx.ticket.updateMany({
+        where: { id: { in: ids.map((x) => String(x)) } },
+        data: {
+          status: nextStatus,
+          closedAt: nextStatus === 'closed' ? now : null
+        }
+      });
+
+      await tx.ticketLog.createMany({
+        data: ids.map((ticketId) => ({
+          ticketId: String(ticketId),
+          userId: currentUserId,
+          level: 'info',
+          action: 'batch_change_status',
+          message: `批量变更工单状态为: ${nextStatus}`,
+          meta: safeStringifyJson({ status: nextStatus }, '{}')
+        }))
+      });
+
+      return updated;
+    });
+
+    res.json({ updated: result.count });
+  } catch (error) {
+    console.error('Error batch updating tickets:', error);
+    res.status(500).json({ error: 'Failed to batch update tickets' });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const ticket = await prisma.ticket.findUnique({
@@ -288,7 +344,7 @@ router.put('/:id/assign', async (req, res) => {
   }
 
   try {
-    const ticket = await prisma.ticket.update({
+    await prisma.ticket.update({
       where: { id },
       data: { assigneeId }
     });
@@ -306,10 +362,82 @@ router.put('/:id/assign', async (req, res) => {
       }
     });
 
-    res.json(formatTicket(ticket));
+    const fresh = await prisma.ticket.findUnique({
+      where: { id },
+      include: {
+        service: true,
+        process: true,
+        assignee: { select: { account: true, email: true } },
+        tasks: { orderBy: { createdAt: 'asc' } },
+        logs: { orderBy: { createdAt: 'asc' } }
+      }
+    });
+
+    res.json(formatTicket(fresh));
   } catch (error) {
     console.error('Error assigning ticket:', error);
     res.status(500).json({ error: 'Failed to assign ticket' });
+  }
+});
+
+// PUT /api/tickets/:id/status
+router.put('/:id/status', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body || {};
+  const authHeader = req.headers.authorization;
+  let currentUserId = null;
+
+  if (authHeader) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key_here');
+      currentUserId = decoded.id;
+    } catch (err) {}
+  }
+
+  const nextStatus = status ? String(status) : '';
+  const allowed = new Set(['open', 'closed', 'on_hold', 'canceled']);
+  if (!allowed.has(nextStatus)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+
+  try {
+    const now = new Date();
+    await prisma.ticket.update({
+      where: { id },
+      data: {
+        status: nextStatus,
+        closedAt: nextStatus === 'closed' ? now : null
+      }
+    });
+
+    await prisma.ticketLog.create({
+      data: {
+        ticketId: id,
+        userId: currentUserId,
+        level: 'info',
+        action: 'change_status',
+        message: `工单状态变更为: ${nextStatus}`,
+        meta: safeStringifyJson({ status: nextStatus }, '{}')
+      }
+    });
+
+    const fresh = await prisma.ticket.findUnique({
+      where: { id },
+      include: {
+        service: true,
+        process: true,
+        assignee: { select: { account: true, email: true } },
+        tasks: { orderBy: { createdAt: 'asc' } },
+        logs: { orderBy: { createdAt: 'asc' } }
+      }
+    });
+
+    res.json(formatTicket(fresh));
+  } catch (error) {
+    console.error('Error updating ticket status:', error);
+    res.status(500).json({ error: 'Failed to update ticket status' });
   }
 });
 

@@ -1,7 +1,8 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Save, ArrowLeft, Play, SlidersHorizontal, AlertCircle, Shield } from 'lucide-react';
-import { ReactFlowProvider, Node, Edge } from '@xyflow/react';
+import { ReactFlowProvider } from '@xyflow/react';
+import type { Node as FlowNode, Edge as FlowEdge } from '@xyflow/react';
 
 import Sidebar from './components/Sidebar';
 import Canvas from './components/Canvas';
@@ -33,9 +34,41 @@ export default function ProcessEditor() {
   });
 
   const [formConfig, setFormConfig] = useState<FormField[]>([]);
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [nodes, setNodes] = useState<FlowNode[]>([]);
+  const [edges, setEdges] = useState<FlowEdge[]>([]);
+  const [selectedNode, setSelectedNode] = useState<FlowNode | null>(null);
+
+  const communityOptions = useMemo(() => ['朝阳小区', '海淀小区', '望京小区'], []);
+  const [communityOpen, setCommunityOpen] = useState(false);
+  const [communityQuery, setCommunityQuery] = useState('');
+  const communityDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  const filteredCommunities = useMemo(() => {
+    const q = communityQuery.trim().toLowerCase();
+    if (!q) return communityOptions;
+    return communityOptions.filter((c) => c.toLowerCase().includes(q));
+  }, [communityOptions, communityQuery]);
+
+  const communitiesDisplay = useMemo(() => {
+    const selected = processData.communities;
+    if (!selected.length) return '全部小区';
+    if (selected.length <= 2) return selected.join('、');
+    return `${selected.slice(0, 2).join('、')} +${selected.length - 2}`;
+  }, [processData.communities]);
+
+  useEffect(() => {
+    if (!communityOpen) return;
+    setCommunityQuery('');
+    const onMouseDown = (event: MouseEvent) => {
+      const el = communityDropdownRef.current;
+      if (!el) return;
+      if (event.target instanceof Node && !el.contains(event.target)) {
+        setCommunityOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [communityOpen]);
 
   useEffect(() => {
     if (!isNew && id) {
@@ -262,23 +295,75 @@ export default function ProcessEditor() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   适用小区
                 </label>
-                <div className="flex gap-4">
-                  {['朝阳小区', '海淀小区', '望京小区'].map(community => (
-                    <label key={community} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={processData.communities.includes(community)}
-                        onChange={(e) => {
-                          const newCommunities = e.target.checked
-                            ? [...processData.communities, community]
-                            : processData.communities.filter(c => c !== community);
-                          setProcessData({ ...processData, communities: newCommunities });
-                        }}
-                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span className="text-sm text-gray-700">{community}</span>
-                    </label>
-                  ))}
+                <div ref={communityDropdownRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setCommunityOpen((v) => !v)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm flex items-center justify-between"
+                  >
+                    <span className={processData.communities.length ? 'text-gray-900' : 'text-gray-500'}>
+                      {communitiesDisplay}
+                    </span>
+                    <span className="text-gray-400">{communityOpen ? '▲' : '▼'}</span>
+                  </button>
+
+                  {communityOpen && (
+                    <div className="absolute z-20 mt-2 w-full rounded-md border border-gray-200 bg-white shadow-lg">
+                      <div className="p-2">
+                        <input
+                          type="text"
+                          value={communityQuery}
+                          onChange={(e) => setCommunityQuery(e.target.value)}
+                          placeholder="搜索小区"
+                          className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                      </div>
+                      <div className="max-h-56 overflow-y-auto px-2 pb-2">
+                        {filteredCommunities.length ? (
+                          filteredCommunities.map((community) => {
+                            const checked = processData.communities.includes(community);
+                            return (
+                              <label
+                                key={community}
+                                className="flex items-center gap-2 px-2 py-2 rounded hover:bg-gray-50 cursor-pointer"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={(e) => {
+                                    const next = e.target.checked
+                                      ? [...processData.communities, community]
+                                      : processData.communities.filter((c) => c !== community);
+                                    setProcessData({ ...processData, communities: next });
+                                  }}
+                                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span className="text-sm text-gray-700">{community}</span>
+                              </label>
+                            );
+                          })
+                        ) : (
+                          <div className="px-2 py-2 text-sm text-gray-500">无匹配结果</div>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between border-t border-gray-100 p-2">
+                        <button
+                          type="button"
+                          onClick={() => setProcessData({ ...processData, communities: [] })}
+                          className="text-sm text-indigo-600 hover:text-indigo-700"
+                        >
+                          清空
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setCommunityOpen(false)}
+                          className="text-sm text-gray-600 hover:text-gray-800"
+                        >
+                          完成
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <p className="mt-1 text-xs text-gray-500">留空表示适用于所有小区</p>
               </div>

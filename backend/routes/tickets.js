@@ -126,7 +126,8 @@ router.get('/', async (req, res) => {
     if (q) {
       where.OR = [
         { title: { contains: String(q), mode: 'insensitive' } },
-        { description: { contains: String(q), mode: 'insensitive' } }
+        { description: { contains: String(q), mode: 'insensitive' } },
+        { ticketNo: { contains: String(q), mode: 'insensitive' } }
       ];
     }
 
@@ -135,7 +136,8 @@ router.get('/', async (req, res) => {
       orderBy: { updatedAt: 'desc' },
       include: {
         service: true,
-        process: true
+        process: true,
+        assignee: { select: { account: true, email: true } },
       }
     });
 
@@ -143,6 +145,102 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error('Failed to fetch tickets:', error);
     res.status(500).json({ error: 'Failed to fetch tickets' });
+  }
+});
+
+// GET /api/tickets/stats/dashboard
+router.get('/stats/dashboard', async (req, res) => {
+  try {
+    const totalTickets = await prisma.ticket.count();
+    const closedTickets = await prisma.ticket.count({ where: { status: 'closed' } });
+    const openTickets = totalTickets - closedTickets;
+    
+    // Average completion time (for closed tickets)
+    const closedList = await prisma.ticket.findMany({
+      where: { status: 'closed', closedAt: { not: null } },
+      select: { createdAt: true, closedAt: true }
+    });
+    
+    let totalTimeMs = 0;
+    closedList.forEach(t => {
+      totalTimeMs += (new Date(t.closedAt).getTime() - new Date(t.createdAt).getTime());
+    });
+    const avgTimeHours = closedList.length > 0 
+      ? (totalTimeMs / closedList.length / (1000 * 60 * 60)).toFixed(1) 
+      : 0;
+
+    // SLA pre-warnings (we can reuse the logic, but let's just count open ones)
+    const openList = await prisma.ticket.findMany({
+      where: { status: { not: 'closed' } },
+      include: { process: { select: { timeLimit: true } } }
+    });
+
+    let overdueCount = 0;
+    let warningCount = 0;
+    const now = new Date().getTime();
+
+    openList.forEach(t => {
+      const limitHours = t.process?.timeLimit || 24;
+      const limitMs = limitHours * 60 * 60 * 1000;
+      const elapsedMs = now - new Date(t.createdAt).getTime();
+      const remainingMs = limitMs - elapsedMs;
+
+      if (remainingMs < 0) overdueCount++;
+      else if (remainingMs < limitMs * 0.2) warningCount++;
+    });
+
+    res.json({
+      total: totalTickets,
+      closed: closedTickets,
+      open: openTickets,
+      completionRate: totalTickets > 0 ? ((closedTickets / totalTickets) * 100).toFixed(1) : 0,
+      avgTimeHours,
+      overdue: overdueCount,
+      warning: warningCount
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+  }
+});
+
+// GET /api/tickets/sla/status
+router.get('/sla/status', async (req, res) => {
+  try {
+    const openTickets = await prisma.ticket.findMany({
+      where: { status: { not: 'closed' } },
+      include: {
+        service: true,
+        process: true,
+        assignee: { select: { account: true } }
+      }
+    });
+
+    const now = new Date().getTime();
+    const slaTickets = openTickets.map(t => {
+      const timeLimitHours = t.process?.timeLimit || 24;
+      const limitMs = timeLimitHours * 60 * 60 * 1000;
+      const elapsedMs = now - new Date(t.createdAt).getTime();
+      const remainingMs = limitMs - elapsedMs;
+      
+      let slaStatus = 'normal';
+      if (remainingMs < 0) slaStatus = 'overdue';
+      else if (remainingMs < limitMs * 0.2) slaStatus = 'warning';
+
+      return {
+        ...formatTicket(t),
+        slaStatus,
+        remainingHours: (remainingMs / (1000 * 60 * 60)).toFixed(1)
+      };
+    }).filter(t => t.slaStatus !== 'normal');
+
+    // Sort by most overdue
+    slaTickets.sort((a, b) => Number(a.remainingHours) - Number(b.remainingHours));
+
+    res.json(slaTickets);
+  } catch (error) {
+    console.error('Failed to fetch SLA tickets:', error);
+    res.status(500).json({ error: 'Failed to fetch SLA tickets' });
   }
 });
 
@@ -170,6 +268,48 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     console.error('Failed to fetch ticket:', error);
     res.status(500).json({ error: 'Failed to fetch ticket' });
+  }
+});
+
+// PUT /api/tickets/:id/assign
+router.put('/:id/assign', async (req, res) => {
+  const { id } = req.params;
+  const { assigneeId } = req.body;
+  const authHeader = req.headers.authorization;
+  let currentUserId = null;
+
+  if (authHeader) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key_here');
+      currentUserId = decoded.id;
+    } catch (err) {}
+  }
+
+  try {
+    const ticket = await prisma.ticket.update({
+      where: { id },
+      data: { assigneeId }
+    });
+
+    const assignee = await prisma.user.findUnique({ where: { id: assigneeId } });
+
+    await prisma.ticketLog.create({
+      data: {
+        ticketId: id,
+        userId: currentUserId,
+        level: 'info',
+        action: 'assign',
+        message: `工单分配给了处理人: ${assignee ? assignee.account : assigneeId}`,
+        meta: safeStringifyJson({ assigneeId }, '{}')
+      }
+    });
+
+    res.json(formatTicket(ticket));
+  } catch (error) {
+    console.error('Error assigning ticket:', error);
+    res.status(500).json({ error: 'Failed to assign ticket' });
   }
 });
 

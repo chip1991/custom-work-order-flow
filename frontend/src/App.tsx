@@ -22,6 +22,7 @@ import Tickets from "@/pages/Tickets";
 import TicketDetail from "@/pages/Tickets/Detail";
 import Dispatch from "@/pages/Dispatch";
 import Sla from "@/pages/Sla";
+import Dashboard from "@/pages/Dashboard";
 
 // 简单的鉴权组件，用于保护全屏路由
 function AuthGuard() {
@@ -51,7 +52,8 @@ export default function App() {
         
         {/* Main Application Layout (带侧边栏) */}
         <Route path="/" element={<Layout />}>
-          <Route index element={<Navigate to="/models" replace />} />
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="models" element={<Models />} />
           <Route path="agents" element={<Agents />} />
           

@@ -13,6 +13,7 @@ export interface TicketProcess {
   nodes?: any;
   edges?: any;
   formConfig?: any;
+  timeLimit?: number;
 }
 
 export interface TicketTask {
@@ -39,6 +40,9 @@ export interface TicketLog {
   message: string;
   meta: any;
   createdAt: string;
+  user?: {
+    account: string;
+  };
 }
 
 export interface Ticket {
@@ -47,15 +51,25 @@ export interface Ticket {
   title: string;
   description: string | null;
   status: string;
+  priority?: string;
   processId: string;
   serviceId: string;
   createdById: string;
+  assigneeId?: string;
   formData: any;
   closedAt: string | null;
   createdAt: string;
   updatedAt: string;
   service?: TicketService | null;
   process?: TicketProcess | null;
+  createdBy?: {
+    account: string;
+    email?: string;
+  };
+  assignee?: {
+    account: string;
+    email?: string;
+  };
   tasks?: TicketTask[];
   logs?: TicketLog[];
 }
@@ -82,6 +96,26 @@ export const getTickets = async (params: GetTicketsParams = {}): Promise<Ticket[
   return res.json();
 };
 
+export const getSlaTickets = async (): Promise<(Ticket & { slaStatus: string; remainingHours: string })[]> => {
+  const res = await fetch("/api/tickets/sla/status");
+  if (!res.ok) throw new Error('Failed to fetch SLA tickets');
+  return res.json();
+};
+
+export const getDashboardStats = async (): Promise<{
+  total: number;
+  closed: number;
+  open: number;
+  completionRate: string | number;
+  avgTimeHours: string | number;
+  overdue: number;
+  warning: number;
+}> => {
+  const res = await fetch("/api/tickets/stats/dashboard");
+  if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+  return res.json();
+};
+
 export const getTicket = async (id: string): Promise<Ticket> => {
   const res = await fetch(`/api/tickets/${id}`);
   if (!res.ok) throw new Error('Failed to fetch ticket');
@@ -104,5 +138,24 @@ export const advanceTicket = async (id: string, data: AdvanceTicketDto = {}): Pr
     const error = await res.json().catch(() => ({}));
     throw new Error(error.error || 'Failed to advance ticket');
   }
+  return res.json();
+};
+
+export const assignTicket = async (id: string, assigneeId: string): Promise<Ticket> => {
+  const res = await fetch(`/api/tickets/${id}/assign`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ assigneeId }),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || 'Failed to assign ticket');
+  }
+  return res.json();
+};
+
+export const getUsers = async (): Promise<{ id: string; account: string; email?: string }[]> => {
+  const res = await fetch('/api/users');
+  if (!res.ok) throw new Error('Failed to fetch users');
   return res.json();
 };

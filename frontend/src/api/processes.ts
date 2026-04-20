@@ -1,15 +1,15 @@
 export interface Process {
   id: string;
   name: string;
-  description: string | null;
-  communities: string | null;
-  status: string | null;
-  timeLimit: number | null;
-  nodes: string;
-  edges: string;
+  description?: string | null;
+  communities?: string | null;
+  status?: string | null;
+  timeLimit?: number | null;
+  nodes?: string;
+  edges?: string;
   formConfig?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type CreateProcessDto = Pick<Process, 'name' | 'description' | 'communities' | 'status' | 'timeLimit' | 'nodes' | 'edges' | 'formConfig'>;

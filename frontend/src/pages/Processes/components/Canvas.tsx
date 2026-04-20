@@ -199,7 +199,7 @@ export default function Canvas({ nodes, edges, setNodes, setEdges, onNodeSelect 
         fitView
       >
         <Background color="#aaa" gap={16} />
-        <Controls position="bottom-center">
+        <Controls position="bottom-center" orientation="horizontal">
           <ControlButton onClick={onLayout} title="自动布局">
             <Layout className="w-4 h-4" />
           </ControlButton>

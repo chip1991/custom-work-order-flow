@@ -17,6 +17,11 @@ import EvaluationsDetail from "@/pages/Evaluations/Detail";
 
 import DocumentPage from "@/pages/Document";
 import ApiKeys from "@/pages/ApiKeys";
+import Services from "@/pages/Services";
+import Tickets from "@/pages/Tickets";
+import TicketDetail from "@/pages/Tickets/Detail";
+import Dispatch from "@/pages/Dispatch";
+import Sla from "@/pages/Sla";
 
 // 简单的鉴权组件，用于保护全屏路由
 function AuthGuard() {
@@ -51,6 +56,11 @@ export default function App() {
           <Route path="agents" element={<Agents />} />
           
           <Route path="processes" element={<Processes />} />
+          <Route path="services" element={<Services />} />
+          <Route path="tickets" element={<Tickets />} />
+          <Route path="tickets/:id" element={<TicketDetail />} />
+          <Route path="dispatch" element={<Dispatch />} />
+          <Route path="sla" element={<Sla />} />
           
           <Route path="datasets" element={<Datasets />} />
           <Route path="datasets/new" element={<DatasetEditor />} />

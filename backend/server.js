@@ -23,6 +23,8 @@ app.use('/api/questions', require('./routes/questions'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/api-keys', require('./routes/api-keys'));
 app.use('/api/processes', require('./routes/processes'));
+app.use('/api/services', require('./routes/services'));
+app.use('/api/tickets', require('./routes/tickets'));
 
 // v1 API (OpenAI compatible)
 app.use('/api/v1', require('./routes/v1-chat'));

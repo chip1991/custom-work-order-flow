@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, ArrowLeft, Edit2, Play, SlidersHorizontal, AlertCircle, Shield } from 'lucide-react';
+import { Save, ArrowLeft, Play, SlidersHorizontal, AlertCircle, Shield } from 'lucide-react';
 import { ReactFlowProvider, Node, Edge } from '@xyflow/react';
 
 import Sidebar from './components/Sidebar';
@@ -126,12 +126,6 @@ export default function ProcessEditor() {
               <h1 className="text-xl font-bold text-gray-900 leading-tight">
                 {processData.name}
               </h1>
-              <button 
-                className="p-1 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
-                title="修改名称"
-              >
-                <Edit2 className="w-4 h-4" />
-              </button>
             </div>
             <p className="text-sm text-gray-500">{processData.description || '暂无描述'}</p>
           </div>

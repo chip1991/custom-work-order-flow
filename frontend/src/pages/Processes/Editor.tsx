@@ -220,43 +220,45 @@ export default function ProcessEditor() {
           </ReactFlowProvider>
         </main>
 
-        <aside className="w-80 border-l border-gray-200 bg-white flex flex-col h-full z-10 shadow-sm">
-          <div className="flex border-b border-gray-200 bg-gray-50 flex-shrink-0">
-            <button
-              onClick={() => setActiveRightTab('properties')}
-              className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 ${
-                activeRightTab === 'properties'
-                  ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              节点属性
-            </button>
-            <button
-              onClick={() => setActiveRightTab('permissions')}
-              className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 ${
-                activeRightTab === 'permissions'
-                  ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <Shield className="w-4 h-4" />
-              表单权限
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-hidden relative">
-            <div className="absolute inset-0 overflow-y-auto">
-              <PropertiesPanel
-                selectedNode={selectedNode}
-                onUpdateNodeData={updateNodeData}
-                formConfig={formConfig}
-                activeTab={activeRightTab}
-              />
+        {selectedNode && (
+          <aside className="w-80 border-l border-gray-200 bg-white flex flex-col h-full z-10 shadow-sm">
+            <div className="flex border-b border-gray-200 bg-gray-50 flex-shrink-0">
+              <button
+                onClick={() => setActiveRightTab('properties')}
+                className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 ${
+                  activeRightTab === 'properties'
+                    ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                节点属性
+              </button>
+              <button
+                onClick={() => setActiveRightTab('permissions')}
+                className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 ${
+                  activeRightTab === 'permissions'
+                    ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <Shield className="w-4 h-4" />
+                表单权限
+              </button>
             </div>
-          </div>
-        </aside>
+
+            <div className="flex-1 overflow-hidden relative">
+              <div className="absolute inset-0 overflow-y-auto">
+                <PropertiesPanel
+                  selectedNode={selectedNode}
+                  onUpdateNodeData={updateNodeData}
+                  formConfig={formConfig}
+                  activeTab={activeRightTab}
+                />
+              </div>
+            </div>
+          </aside>
+        )}
       </div>
 
       {activeTab === 'basic' && (

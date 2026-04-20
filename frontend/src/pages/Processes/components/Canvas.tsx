@@ -134,6 +134,10 @@ export default function Canvas({ nodes, edges, setNodes, setEdges, onNodeSelect 
     }
   }, [onNodeSelect]);
 
+  const onPaneClick = useCallback(() => {
+    onNodeSelect(null);
+  }, [onNodeSelect]);
+
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
     [setNodes]
@@ -192,6 +196,7 @@ export default function Canvas({ nodes, edges, setNodes, setEdges, onNodeSelect 
         onDrop={onDrop}
         onDragOver={onDragOver}
         onSelectionChange={onSelectionChange}
+        onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         defaultEdgeOptions={{ type: 'default' }}

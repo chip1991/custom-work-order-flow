@@ -12,6 +12,8 @@ import { getProcess, createProcess, updateProcess } from '@/api/processes';
 
 type TabType = 'basic' | 'form' | 'node';
 
+const NO_PERMISSION_NODES = ['conditionNode', 'endNode'];
+
 export default function ProcessEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -75,6 +77,12 @@ export default function ProcessEditor() {
       loadProcess(id);
     }
   }, [id, isNew]);
+
+  useEffect(() => {
+    if (selectedNode?.type && NO_PERMISSION_NODES.includes(selectedNode.type) && activeRightTab === 'permissions') {
+      setActiveRightTab('properties');
+    }
+  }, [selectedNode, activeRightTab]);
 
   const loadProcess = async (processId: string) => {
     try {
@@ -234,17 +242,19 @@ export default function ProcessEditor() {
                 <SlidersHorizontal className="w-4 h-4" />
                 节点属性
               </button>
-              <button
-                onClick={() => setActiveRightTab('permissions')}
-                className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 ${
-                  activeRightTab === 'permissions'
-                    ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <Shield className="w-4 h-4" />
-                表单权限
-              </button>
+              {selectedNode?.type && !NO_PERMISSION_NODES.includes(selectedNode.type) && (
+                <button
+                  onClick={() => setActiveRightTab('permissions')}
+                  className={`flex-1 py-3 text-sm font-medium flex items-center justify-center gap-2 ${
+                    activeRightTab === 'permissions'
+                      ? 'border-b-2 border-indigo-600 text-indigo-600 bg-white'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <Shield className="w-4 h-4" />
+                  表单权限
+                </button>
+              )}
             </div>
 
             <div className="flex-1 overflow-hidden relative">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Node } from '@xyflow/react';
+import { Trash2, Plus } from 'lucide-react';
 import { FormField } from './FormBuilder';
 
 interface PropertiesPanelProps {
@@ -93,46 +94,190 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formCo
             </>
           )}
 
-          {type === 'condition' && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">判断字段</label>
-                <input
-                  type="text"
-                  value={((data.conditionConfig as any)?.field) || ''}
-                  onChange={(e) => onUpdateNodeData(id, { conditionConfig: { ...(data.conditionConfig as any), field: e.target.value } })}
-                  placeholder="例如: 工单类型"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">判断条件</label>
-                <select
-                  value={((data.conditionConfig as any)?.operator) || '='}
-                  onChange={(e) => onUpdateNodeData(id, { conditionConfig: { ...(data.conditionConfig as any), operator: e.target.value } })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                >
+          {(type === 'condition' || type === 'conditionNode') && (() => {
+            const config = data.conditionConfig as any;
+            let currentConfig = { logicalOperator: 'AND', conditions: [] as any[] };
+            
+            if (config) {
+              if (config.conditions) {
+                currentConfig = config;
+              } else if (config.field || config.operator || config.value) {
+                currentConfig = {
+                  logicalOperator: 'AND',
+                  conditions: [{
+                    field: config.field || '',
+                    operator: config.operator || '=',
+                    value: config.value || ''
+                  }]
+                };
+              }
+            }
+
+            const handleUpdate = (newConfig: any) => {
+              onUpdateNodeData(id, { conditionConfig: newConfig });
+            };
+
+            const addCondition = () => {
+              handleUpdate({
+                ...currentConfig,
+                conditions: [...currentConfig.conditions, { field: '', operator: '=', value: '' }]
+              });
+            };
+
+            const removeCondition = (index: number) => {
+              const newConditions = [...currentConfig.conditions];
+              newConditions.splice(index, 1);
+              handleUpdate({ ...currentConfig, conditions: newConditions });
+            };
+
+            const updateCondition = (index: number, key: string, val: any) => {
+              const newConditions = [...currentConfig.conditions];
+              newConditions[index] = { ...newConditions[index], [key]: val };
+              // Reset operator and value when field changes
+              if (key === 'field') {
+                newConditions[index].operator = '=';
+                newConditions[index].value = '';
+              }
+              handleUpdate({ ...currentConfig, conditions: newConditions });
+            };
+
+            const getOperatorOptions = (fieldType: string) => {
+              if (fieldType === 'number') {
+                return (
+                  <>
+                    <option value="=">等于 (=)</option>
+                    <option value="!=">不等于 (!=)</option>
+                    <option value=">">大于 (&gt;)</option>
+                    <option value="<">小于 (&lt;)</option>
+                    <option value=">=">大于等于 (&gt;=)</option>
+                    <option value="<=">小于等于 (&lt;=)</option>
+                  </>
+                );
+              }
+              if (fieldType === 'select' || fieldType === 'radio') {
+                return (
+                  <>
+                    <option value="=">等于</option>
+                    <option value="!=">不等于</option>
+                  </>
+                );
+              }
+              return (
+                <>
                   <option value="=">等于 (=)</option>
                   <option value="!=">不等于 (!=)</option>
-                  <option value=">">大于 (&gt;)</option>
-                  <option value="<">小于 (&lt;)</option>
-                  <option value=">=">大于等于 (&gt;=)</option>
-                  <option value="<=">小于等于 (&lt;=)</option>
                   <option value="contains">包含</option>
-                </select>
+                </>
+              );
+            };
+
+            return (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-gray-700">逻辑关系</label>
+                  <select
+                    value={currentConfig.logicalOperator || 'AND'}
+                    onChange={(e) => handleUpdate({ ...currentConfig, logicalOperator: e.target.value })}
+                    className="px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  >
+                    <option value="AND">且 (AND)</option>
+                    <option value="OR">或 (OR)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-3">
+                  {currentConfig.conditions.map((cond: any, index: number) => {
+                    const selectedField = formConfig.find(f => f.id === cond.field);
+                    const fieldType = selectedField?.type || 'text';
+
+                    return (
+                      <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded-md space-y-3 relative">
+                        <div className="absolute top-2 right-2">
+                          <button
+                            type="button"
+                            onClick={() => removeCondition(index)}
+                            className="text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">判断字段</label>
+                          <select
+                            value={cond.field}
+                            onChange={(e) => updateCondition(index, 'field', e.target.value)}
+                            className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                          >
+                            <option value="">-- 选择字段 --</option>
+                            {formConfig.map(f => (
+                              <option key={f.id} value={f.id}>{f.name || f.id}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {cond.field && (
+                          <div className="flex gap-2">
+                            <div className="flex-1">
+                              <label className="block text-xs font-medium text-gray-500 mb-1">判断条件</label>
+                              <select
+                                value={cond.operator}
+                                onChange={(e) => updateCondition(index, 'operator', e.target.value)}
+                                className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                              >
+                                {getOperatorOptions(fieldType)}
+                              </select>
+                            </div>
+                            
+                            <div className="flex-1">
+                              <label className="block text-xs font-medium text-gray-500 mb-1">比较值</label>
+                              {(fieldType === 'select' || fieldType === 'radio') && selectedField?.options ? (
+                                <select
+                                  value={cond.value}
+                                  onChange={(e) => updateCondition(index, 'value', e.target.value)}
+                                  className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                >
+                                  <option value="">-- 选择值 --</option>
+                                  {selectedField.options.map((opt: { label: string; value: string }) => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                  ))}
+                                </select>
+                              ) : fieldType === 'number' ? (
+                                <input
+                                  type="number"
+                                  value={cond.value}
+                                  onChange={(e) => updateCondition(index, 'value', e.target.value)}
+                                  placeholder="输入数值"
+                                  className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={cond.value}
+                                  onChange={(e) => updateCondition(index, 'value', e.target.value)}
+                                  placeholder="输入比较值"
+                                  className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={addCondition}
+                  className="w-full flex items-center justify-center gap-1 px-4 py-2 border border-dashed border-gray-300 rounded-md text-sm font-medium text-indigo-600 hover:bg-indigo-50 hover:border-indigo-500 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  添加条件
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">比较值</label>
-                <input
-                  type="text"
-                  value={((data.conditionConfig as any)?.value) || ''}
-                  onChange={(e) => onUpdateNodeData(id, { conditionConfig: { ...(data.conditionConfig as any), value: e.target.value } })}
-                  placeholder="例如: 维修"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
         </div>
       ) : (

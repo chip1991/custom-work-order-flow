@@ -304,7 +304,7 @@ export default function ProcessEditor() {
                         const m = processData.timeLimit % 60;
                         setProcessData({ ...processData, timeLimit: d * 24 * 60 + h * 60 + m });
                       }}
-                      className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className="w-16 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     />
                     <span className="text-sm text-gray-700">天</span>
                     <input
@@ -318,7 +318,7 @@ export default function ProcessEditor() {
                         const m = processData.timeLimit % 60;
                         setProcessData({ ...processData, timeLimit: d * 24 * 60 + h * 60 + m });
                       }}
-                      className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className="w-16 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     />
                     <span className="text-sm text-gray-700">小时</span>
                     <input
@@ -332,7 +332,7 @@ export default function ProcessEditor() {
                         const m = parseInt(e.target.value, 10) || 0;
                         setProcessData({ ...processData, timeLimit: d * 24 * 60 + h * 60 + m });
                       }}
-                      className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className="w-16 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     />
                     <span className="text-sm text-gray-700">分钟</span>
                   </div>

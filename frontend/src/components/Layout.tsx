@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, NavLink, Navigate, useNavigate } from "react-router-dom";
-import { Cpu, BookOpen, Activity, LogOut, Menu, X, Bot, ChevronLeft, ChevronRight, Key, Network, Package, Ticket, Shuffle, Bell, BarChart3 } from "lucide-react";
+import { Cpu, BookOpen, Activity, LogOut, Menu, X, Bot, ChevronLeft, ChevronRight, Key, Network, Package, Ticket, Shuffle, Bell, BarChart3, Users, MessageSquare } from "lucide-react";
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -27,6 +27,8 @@ export default function Layout() {
     { name: "工单台账", path: "/tickets", icon: <Ticket className="w-5 h-5 shrink-0" /> },
     { name: "调度中心", path: "/dispatch", icon: <Shuffle className="w-5 h-5 shrink-0" /> },
     { name: "SLA预警", path: "/sla", icon: <Bell className="w-5 h-5 shrink-0" /> },
+    { name: "评价与回访", path: "/feedback", icon: <MessageSquare className="w-5 h-5 shrink-0" /> },
+    { name: "组织与权限", path: "/org", icon: <Users className="w-5 h-5 shrink-0" /> },
     { name: "题库中心", path: "/datasets", icon: <BookOpen className="w-5 h-5 shrink-0" /> },
     { name: "测评中心", path: "/evaluations", icon: <Activity className="w-5 h-5 shrink-0" /> },
     { name: "API 密钥", path: "/api-keys", icon: <Key className="w-5 h-5 shrink-0" /> },

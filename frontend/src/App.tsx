@@ -23,6 +23,8 @@ import TicketDetail from "@/pages/Tickets/Detail";
 import Dispatch from "@/pages/Dispatch";
 import Sla from "@/pages/Sla";
 import Dashboard from "@/pages/Dashboard";
+import Org from "@/pages/Org";
+import Feedback from "@/pages/Feedback";
 
 // 简单的鉴权组件，用于保护全屏路由
 function AuthGuard() {
@@ -63,6 +65,8 @@ export default function App() {
           <Route path="tickets/:id" element={<TicketDetail />} />
           <Route path="dispatch" element={<Dispatch />} />
           <Route path="sla" element={<Sla />} />
+          <Route path="org" element={<Org />} />
+          <Route path="feedback" element={<Feedback />} />
           
           <Route path="datasets" element={<Datasets />} />
           <Route path="datasets/new" element={<DatasetEditor />} />

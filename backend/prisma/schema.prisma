@@ -22,6 +22,7 @@ model User {
   ticketsCreated  Ticket[]  @relation("TicketCreatedBy")
   ticketsAssigned Ticket[]  @relation("TicketAssignee")
   ticketLogs      TicketLog[]
+  feedbacks       TicketFeedback[]
 }
 
 model Model {
@@ -178,6 +179,7 @@ model Ticket {
 
   tasks TicketTask[]
   logs  TicketLog[]
+  feedback TicketFeedback?
 
   @@unique([ticketNo])
   @@index([processId])
@@ -185,6 +187,46 @@ model Ticket {
   @@index([createdById])
   @@index([assigneeId])
   @@index([status])
+}
+
+model TicketFeedback {
+  id          String   @id @default(uuid())
+  ticketId    String   @unique
+  userId      String?
+  rating      Int      @default(5)
+  content     String?
+  tags        String?  @default("[]") // JSON string array
+  callback    String?  // callback notes
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([rating])
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  parentId  String?
+  type      String   @default("department") // 'community', 'project', 'department'
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent    Organization?  @relation("OrgHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Organization[] @relation("OrgHierarchy")
+  
+  @@index([parentId])
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model TicketTask {

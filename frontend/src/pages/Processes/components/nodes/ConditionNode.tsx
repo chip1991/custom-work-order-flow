@@ -2,6 +2,11 @@ import { Handle, Position } from '@xyflow/react';
 import { GitMerge } from 'lucide-react';
 
 export default function ConditionNode({ data }: { data: any }) {
+  const branches = data.branches || [
+    { id: 'true', name: '是', conditionConfig: data.conditionConfig },
+    { id: 'false', name: '否' }
+  ];
+
   const renderConditionText = (config: any) => {
     if (!config) return '未配置';
     
@@ -40,30 +45,36 @@ export default function ConditionNode({ data }: { data: any }) {
       
       <div className="p-3 bg-white space-y-2 rounded-b-lg">
         <div className="text-xs text-gray-700 font-medium">{data.label || '条件分支'}</div>
-        <div className="text-xs text-gray-500">
-          判断: {renderConditionText(data.conditionConfig)}
-        </div>
         
-        <div className="flex flex-col items-end gap-3 pt-2 relative">
-          <div className="text-[10px] text-gray-500 pr-1">是</div>
-          <div className="text-[10px] text-gray-500 pr-1">否</div>
+        <div className="flex flex-col gap-2 pt-2">
+          {branches.map((branch: any, index: number) => (
+            <div key={branch.id} className="relative flex flex-col gap-1 bg-gray-50 p-2 rounded border border-gray-100">
+              <div className="flex justify-between items-center text-xs text-gray-700 font-medium">
+                <span className="truncate w-32">{branch.name || `分支 ${index + 1}`}</span>
+                <Handle 
+                  type="source" 
+                  position={Position.Right} 
+                  id={branch.id} 
+                  className="w-3 h-3 bg-orange-500 border-2 border-white !-right-4"
+                />
+              </div>
+              <div className="text-[10px] text-gray-500">
+                判断: {renderConditionText(branch.conditionConfig)}
+              </div>
+            </div>
+          ))}
+          
+          <div className="relative flex justify-between items-center text-xs text-gray-500 bg-gray-50 p-2 rounded border border-gray-100 mt-1">
+            <span className="truncate w-32">默认/否则</span>
+            <Handle 
+              type="source" 
+              position={Position.Right} 
+              id="default" 
+              className="w-3 h-3 bg-orange-500 border-2 border-white !-right-4"
+            />
+          </div>
         </div>
       </div>
-      
-      <Handle 
-        type="source" 
-        position={Position.Right} 
-        id="true" 
-        style={{ top: '68%' }}
-        className="w-3 h-3 bg-orange-500 border-2 border-white"
-      />
-      <Handle 
-        type="source" 
-        position={Position.Right} 
-        id="false" 
-        style={{ top: '88%' }}
-        className="w-3 h-3 bg-orange-500 border-2 border-white"
-      />
     </div>
   );
 }

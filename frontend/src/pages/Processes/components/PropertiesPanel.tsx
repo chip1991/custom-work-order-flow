@@ -11,6 +11,8 @@ interface PropertiesPanelProps {
 }
 
 export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formConfig = [], activeTab = 'properties' }: PropertiesPanelProps) {
+  const [selectedBranchId, setSelectedBranchId] = useState<string>('');
+
   if (!selectedNode) {
     return (
       <div className="p-6 text-center text-gray-500">
@@ -95,8 +97,18 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formCo
           )}
 
           {(type === 'condition' || type === 'conditionNode') && (() => {
-            const config = data.conditionConfig as any;
+            const branches = data.branches as any[] || [{
+              id: 'branch_1',
+              name: '分支 1',
+              conditionConfig: data.conditionConfig || { logicalOperator: 'AND', conditions: [] }
+            }];
+            
+            const activeBranchId = branches.some((b: any) => b.id === selectedBranchId) ? selectedBranchId : branches[0].id;
+            const activeBranchIndex = branches.findIndex((b: any) => b.id === activeBranchId);
+            const activeBranch = branches[activeBranchIndex];
+            
             let currentConfig = { logicalOperator: 'AND', conditions: [] as any[] };
+            const config = activeBranch.conditionConfig;
             
             if (config) {
               if (config.conditions) {
@@ -113,8 +125,43 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formCo
               }
             }
 
+            const handleBranchesUpdate = (newBranches: any[]) => {
+              // Ensure we don't lose other data properties, but we should override conditionConfig at top level if needed? 
+              // Usually we just save `branches` to node data.
+              onUpdateNodeData(id, { branches: newBranches });
+            };
+
             const handleUpdate = (newConfig: any) => {
-              onUpdateNodeData(id, { conditionConfig: newConfig });
+              const newBranches = [...branches];
+              newBranches[activeBranchIndex] = { ...activeBranch, conditionConfig: newConfig };
+              handleBranchesUpdate(newBranches);
+            };
+
+            const addBranch = () => {
+              const newId = `branch_${Date.now()}`;
+              const newBranches = [...branches, {
+                id: newId,
+                name: `分支 ${branches.length + 1}`,
+                conditionConfig: { logicalOperator: 'AND', conditions: [] }
+              }];
+              handleBranchesUpdate(newBranches);
+              setSelectedBranchId(newId);
+            };
+
+            const removeBranch = (branchId: string, e: React.MouseEvent) => {
+              e.stopPropagation();
+              if (branches.length <= 1) return;
+              const newBranches = branches.filter((b: any) => b.id !== branchId);
+              handleBranchesUpdate(newBranches);
+              if (selectedBranchId === branchId) {
+                setSelectedBranchId(newBranches[0].id);
+              }
+            };
+            
+            const updateBranchName = (name: string) => {
+              const newBranches = [...branches];
+              newBranches[activeBranchIndex] = { ...activeBranch, name };
+              handleBranchesUpdate(newBranches);
             };
 
             const addCondition = () => {
@@ -133,7 +180,6 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formCo
             const updateCondition = (index: number, key: string, val: any) => {
               const newConditions = [...currentConfig.conditions];
               newConditions[index] = { ...newConditions[index], [key]: val };
-              // Reset operator and value when field changes
               if (key === 'field') {
                 newConditions[index].operator = '=';
                 newConditions[index].value = '';
@@ -172,8 +218,51 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formCo
             };
 
             return (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              <div className="space-y-4 pt-4 border-t border-gray-200">
+                <h4 className="font-medium text-gray-900">分支设置</h4>
+                
+                <div className="flex flex-wrap gap-2">
+                  {branches.map((branch: any) => (
+                    <div
+                      key={branch.id}
+                      onClick={() => setSelectedBranchId(branch.id)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-md cursor-pointer border text-sm transition-colors ${
+                        activeBranchId === branch.id 
+                          ? 'bg-indigo-50 border-indigo-200 text-indigo-700' 
+                          : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>{branch.name}</span>
+                      {branches.length > 1 && (
+                        <Trash2 
+                          className="w-3.5 h-3.5 text-gray-400 hover:text-red-500 transition-colors" 
+                          onClick={(e) => removeBranch(branch.id, e)}
+                        />
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addBranch}
+                    className="flex items-center justify-center w-8 h-8 rounded-md border border-dashed border-gray-300 text-gray-400 hover:text-indigo-600 hover:border-indigo-400 hover:bg-indigo-50 transition-colors"
+                    title="添加分支"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">分支名称</label>
+                    <input
+                      type="text"
+                      value={activeBranch.name}
+                      onChange={(e) => updateBranchName(e.target.value)}
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
                   <label className="block text-sm font-medium text-gray-700">逻辑关系</label>
                   <select
                     value={currentConfig.logicalOperator || 'AND'}
@@ -275,6 +364,7 @@ export default function PropertiesPanel({ selectedNode, onUpdateNodeData, formCo
                   <Plus className="w-4 h-4" />
                   添加条件
                 </button>
+                </div>
               </div>
             );
           })()}

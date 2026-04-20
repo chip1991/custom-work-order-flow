@@ -12,7 +12,7 @@ import { getProcess, createProcess, updateProcess } from '@/api/processes';
 
 type TabType = 'basic' | 'form' | 'node';
 
-const NO_PERMISSION_NODES = ['conditionNode', 'endNode'];
+const NO_PERMISSION_NODES = ['condition', 'endNode'];
 
 export default function ProcessEditor() {
   const { id } = useParams<{ id: string }>();

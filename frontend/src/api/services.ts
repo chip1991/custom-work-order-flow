@@ -1,10 +1,7 @@
 export interface ServiceProcess {
   id: string;
   name: string;
-  communities?: any;
-  nodes?: any;
-  edges?: any;
-  formConfig?: any;
+  config?: any;
 }
 
 export interface Service {
@@ -31,9 +28,16 @@ export type CreateServiceDto = {
 
 export type UpdateServiceDto = Partial<CreateServiceDto>;
 
-export const getServices = async (): Promise<Service[]> => {
-  const res = await fetch('/api/services');
+export const getServices = async (params?: { status?: string }): Promise<Service[]> => {
+  const query = params?.status ? `?status=${params.status}` : "";
+  const res = await fetch(`/api/services${query}`);
   if (!res.ok) throw new Error('Failed to fetch services');
+  return res.json();
+};
+
+export const getService = async (id: string): Promise<Service> => {
+  const res = await fetch(`/api/services/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch service');
   return res.json();
 };
 

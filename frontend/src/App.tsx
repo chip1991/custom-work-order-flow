@@ -25,6 +25,12 @@ import Sla from "@/pages/Sla";
 import Dashboard from "@/pages/Dashboard";
 import Org from "@/pages/Org";
 import Feedback from "@/pages/Feedback";
+import MobileLayout from "@/pages/Mobile/Layout";
+import OwnerHome from "@/pages/Mobile/Owner/index";
+import OwnerCreate from "@/pages/Mobile/Owner/Create";
+import OwnerList from "@/pages/Mobile/Owner/List";
+import EmployeeHome from "@/pages/Mobile/Employee/index";
+import EmployeeTask from "@/pages/Mobile/Employee/Task";
 
 // 简单的鉴权组件，用于保护全屏路由
 function AuthGuard() {
@@ -77,6 +83,18 @@ export default function App() {
           <Route path="evaluations/:id" element={<EvaluationsDetail />} />
           
           <Route path="api-keys" element={<ApiKeys />} />
+        </Route>
+
+        {/* Mobile Mock Application Layout */}
+        <Route path="/mobile" element={<MobileLayout />}>
+          {/* Owner End (To C) */}
+          <Route path="owner" element={<OwnerHome />} />
+          <Route path="owner/create/:serviceId" element={<OwnerCreate />} />
+          <Route path="owner/list" element={<OwnerList />} />
+          
+          {/* Employee End (To B) */}
+          <Route path="employee" element={<EmployeeHome />} />
+          <Route path="employee/task/:taskId" element={<EmployeeTask />} />
         </Route>
 
         {/* Fallback */}

@@ -14,6 +14,7 @@ export interface TicketProcess {
   edges?: any;
   formConfig?: any;
   timeLimit?: number;
+  config?: any;
 }
 
 export interface TicketTask {
@@ -90,6 +91,14 @@ const toQueryString = (params: Record<string, string | undefined>) => {
   return str ? `?${str}` : '';
 };
 
+export interface CreateTicketDto {
+  serviceId: string;
+  title: string;
+  description?: string;
+  formData?: any;
+  createdById: string;
+}
+
 export const getTickets = async (params: GetTicketsParams = {}): Promise<Ticket[]> => {
   const res = await fetch(`/api/tickets${toQueryString(params as any)}`);
   if (!res.ok) throw new Error('Failed to fetch tickets');
@@ -151,6 +160,16 @@ export const assignTicket = async (id: string, assigneeId: string): Promise<Tick
     const error = await res.json().catch(() => ({}));
     throw new Error(error.error || 'Failed to assign ticket');
   }
+  return res.json();
+};
+
+export const createTicket = async (data: CreateTicketDto): Promise<Ticket> => {
+  const res = await fetch('/api/tickets', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error('Failed to create ticket');
   return res.json();
 };
 

@@ -62,7 +62,7 @@ export default function EmployeeTask() {
   }
 
   // 员工处理通常对应 taskNode 或 approvalNode，这里简化取第一个非 start 的配置
-  const handleNode = ticket.process?.config ? JSON.parse(ticket.process.config as any)?.nodes?.find((n: any) => n.type !== 'start' && n.type !== 'endNode') : null;
+  const handleNode = ticket.process?.config ? (typeof ticket.process.config === 'string' ? JSON.parse(ticket.process.config) : ticket.process.config)?.nodes?.find((n: any) => n.type !== 'start' && n.type !== 'endNode') : null;
   const formConfig = handleNode?.data?.formConfig || { fields: [] };
 
   return (

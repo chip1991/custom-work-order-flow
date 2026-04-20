@@ -65,7 +65,7 @@ export default function OwnerCreate() {
     );
   }
 
-  const startNode = service.process?.config ? JSON.parse(service.process.config as any)?.nodes?.find((n: any) => n.type === 'start') : null;
+  const startNode = service.process?.config ? (typeof service.process.config === 'string' ? JSON.parse(service.process.config) : service.process.config)?.nodes?.find((n: any) => n.type === 'start') : null;
   const formConfig = startNode?.data?.formConfig || { fields: [] };
 
   return (

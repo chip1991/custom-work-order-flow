@@ -91,6 +91,38 @@ router.get('/public', async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const service = await prisma.service.findUnique({
+      where: { id },
+      include: { process: true }
+    });
+
+    if (!service) {
+      return res.status(404).json({ error: 'Service not found' });
+    }
+
+    res.json({
+      ...service,
+      config: safeParseJson(service.config, {}),
+      process: service.process
+        ? {
+            ...service.process,
+            communities: safeParseJson(service.process.communities, []),
+            nodes: safeParseJson(service.process.nodes, []),
+            edges: safeParseJson(service.process.edges, []),
+            formConfig: safeParseJson(service.process.formConfig, []),
+            config: safeParseJson(service.process.config, {})
+          }
+        : null
+    });
+  } catch (error) {
+    console.error('Failed to fetch service:', error);
+    res.status(500).json({ error: 'Failed to fetch service' });
+  }
+});
+
 router.post('/', async (req, res) => {
   try {
     const { processId, name, description, config, enabled, createdById } = req.body;
